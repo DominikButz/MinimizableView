@@ -1,3 +1,181 @@
-# MinimizableView
+# MinimizableView (iOS 13 / iPadOS)
 
-A description of this package.
+[![Version](https://img.shields.io/cocoapods/v/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
+[![License](https://img.shields.io/cocoapods/l/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
+[![Platform](https://img.shields.io/cocoapods/p/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
+
+
+ MinimizableView is a simple SwiftUI view for iOS and iPadOS that can minimize like the mini-player in the Spotify or Apple Music app. Currently, it seems that SwiftUI does not support custom modals (with different animations / states than sheet, actionSheet, alert, popover etc.), so this simple view can be considered as a workaround.
+It can only be used from iOS 13.0 because SwiftUI is not supported in earlier iOS versions.
+
+## Example project
+
+This repo only contains the Swift package, no example code. Please download the example project [here](https://github.com/DominikButz/MinimizableViewExample.git).
+You need to add the MinimizableView package either through cocoapods or the Swift Package Manager (see below - Installation). 
+
+## Features
+
+* Create your own content and compact view. The compact view is optional - in case you set it in the initializer, it will appear in the minimized state. 
+* By changing the setting properties of the MinimizableViewHandler, you can customize the following properties:
+	- minimizedHeight
+	- lateralMargin
+	- expandedTopMargin
+	- backgroundColor
+	- cornerRadius
+	- shadowColor
+	- shadowRadius
+	
+	Check out the examples for details. 
+
+
+## Installation
+
+
+Installation through the Swift Package Manager (SPM) or cocoapods is recommended. 
+
+SPM:
+Select your project (not the target) and then select the Swift Packages tab. Click + and type MinimizableView - SPM should find the package on github. 
+
+Cocoapods:
+
+target '[project name]' do
+ 	pod 'MinimizableView'
+end
+
+
+Check out the version history below for the current version.
+
+
+Make sure to import MinimizableView in every file where you use the MinimizableView or MinimizableViewHandler
+
+```Swift
+import MinimizableView
+```
+
+## Usage
+
+Check out the following example. 
+
+
+![MinimizableView example](gitResources/example01.gif) 
+
+
+### Code example: Content View (your main view)
+
+Make sure to embed your main view in a ZStack and the the ZStack in a GeometryReader. The MinimizableView must be added as last view within the ZStack. 
+To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
+
+In the initializer of MinimizableView make sure to cast your content view and the compact view to AnyView (see below). The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
+
+You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
+
+```Swift
+	import SwiftUI
+	import MinimizableView
+	import Combine
+
+	struct ContentView: View {
+		
+	    var minimizableViewHandler: MinimizableViewHandler = MinimizableViewHandler()
+	    @State var selectedTabIndex: Int = 0
+	    
+	    init() {
+	        
+	        self.minimizableViewHandler.settings.backgroundColor = Color(.secondarySystemBackground)
+	        self.minimizableViewHandler.settings.lateralMargin = 10
+	        // change other settings if deemded necessary.
+	    }
+	    
+	    var body: some View {
+	        GeometryReader { proxy in
+	            ZStack {
+	                
+	                TabView(selection: self.$selectedTabIndex) {
+	                    
+	                    Button(action: {
+	                        
+	                        self.minimizableViewHandler.present()
+	                        
+	                    }) { TranslucentTextButtonView(title: "Launch Minimizable View", foregroundColor: .green, backgroundColor: .green)}
+	                        .tabItem {
+	                            Image(systemName: "chevron.up.square.fill")
+	                            Text("Main View")
+	                    }.tag(0)
+	                    
+	                    Text("More stuff").tabItem {
+	                        Image(systemName: "dot.square.fill")
+	                        Text("2nd View")
+	                    }.tag(1)
+	                    
+	                    Text("Even more stuff").tabItem {
+	                        Image(systemName: "square.split.2x1.fill")
+	                        Text("3rd View")
+	                    }.tag(2)
+	                    
+	                    
+	                }
+	               
+		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
+	               MinimizableView(content: AnyView(ContentExample()), 									compactView: AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler)
+	        
+	            }
+	                      
+	                
+	        }
+	    
+	        //
+	    }
+}
+   
+
+```
+
+
+### Code Example: TopDelimiterAreaView in your MinimizableView content
+
+If you want a gray capsule shaped delimiter view at the top of your content (which can act as button to change the expansion state ), you can add a TopDelimiterAreaView. Attach a tap gesture recognizer to toggle the expansion state. 
+
+```Swift
+		VStack {
+    			TopDelimiterAreaView(areaWidth: proxy.size.width).onTapGesture {
+                  self.minimizableViewHandler.isMinimized.toggle()
+            }
+                    
+        /// other views             
+   }
+```
+### Code Example: VerticalDragGesture Recognizer
+
+Add a VerticalDragGesture as modifier to your compact view. If the user swipes upwards, the minimizableView will expand. You can do the same in your main content that is embedded in the minimizableView to allow triggering minimization when the user swipes down.
+
+```Swift
+		struct CompactViewExample: View {
+	    
+	    @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
+	    
+	    var body: some View {
+	        GeometryReader { proxy in
+	             HStack {
+	                Text("Compact View")
+	             }.frame(width: proxy.size.width, height: proxy.size.height).onTapGesture {
+	                    self.minimizableViewHandler.expand()
+	             }.background(Color(.secondarySystemBackground)).modifier(VerticalDragGesture(translationHeightTriggerValue: 40))
+	        }
+	    }
+	}
+```
+
+## Change log
+#### [Version 0.2](https://github.com/DominikButz/MinimizableView/releases/tag/0.2)
+Initial public release. 
+
+
+## Author
+
+dominikbutz@gmail.com
+
+## License
+
+MinimizableView is available under the MIT license. See the LICENSE file for more info.
+
+
