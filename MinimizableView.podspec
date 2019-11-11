@@ -28,11 +28,12 @@ It can only be used from iOS 13.0 or iPadOS because SwiftUI is not supported in 
 
 
   s.ios.deployment_target = '13.0'
+ cd s.ipados.deployment_target = '13.0'
 
   s.source_files = 'Sources/**/*'
   #s.exclude_files = 'MinimizableView /**/*.plist'
 
 
-  # s.public_header_files = 'DYModalNavigationController/**/*.h'
+  # s.public_header_files = 'MinimizableView/**/*.h'
 
 end

@@ -83,7 +83,7 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	        
 	        self.minimizableViewHandler.settings.backgroundColor = Color(.secondarySystemBackground)
 	        self.minimizableViewHandler.settings.lateralMargin = 10
-	        // change other settings if deemded necessary.
+	        // change other settings if deemed necessary.
 	    }
 	    
 	    var body: some View {
@@ -116,7 +116,7 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	                }
 	               
 		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
-	               MinimizableView(content: AnyView(ContentExample()), 									compactView: AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler)
+	               MinimizableView(content: AnyView(ContentExample()), compactView: AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler)
 	        
 	            }
 	                      
