@@ -6,7 +6,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MinimizableView'
-  s.version          = '0.2'
+  s.version          = '0.2.1'
   s.summary          = 'SwiftUI view that minimises to the bottom of the screen similar to the mini-player in Apple Music or Spotify.'
   s.swift_version = '5.1'
 
@@ -27,8 +27,8 @@ It can only be used from iOS 13.0 or iPadOS because SwiftUI is not supported in 
   s.source           = { :git => 'https://github.com/DominikButz/MinimizableView.git', :tag => s.version.to_s }
 
 
-  s.ios.deployment_target = '13.0'
- cd s.ipados.deployment_target = '13.0'
+s.ios.deployment_target = '13.0'
+ s.ipados.deployment_target = '13.0'
 
   s.source_files = 'Sources/**/*'
   #s.exclude_files = 'MinimizableView /**/*.plist'

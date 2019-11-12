@@ -4,7 +4,7 @@
 //
 //  Created by Dominik Butz on 7/10/2019.
 //  Copyright © 2019 Duoyun. All rights reserved.
-//Version 0.2
+//Version 0.2.1
 
 import SwiftUI
 import Combine
@@ -158,7 +158,13 @@ public struct MinimizableView: View {
             return geometry.size.height
          } else {
              // is presenting
-            return self.minimizableViewHandler.draggedOffset.height
+            if self.minimizableViewHandler.isMinimized {
+                return self.minimizableViewHandler.draggedOffset.height < 0 ? self.minimizableViewHandler.draggedOffset.height / 2: 0
+            } else {
+                // in expanded state, only return offset if dragging down
+                 return self.minimizableViewHandler.draggedOffset.height > 0 ? self.minimizableViewHandler.draggedOffset.height  : 0
+            }
+           
 
          }
 
@@ -167,7 +173,9 @@ public struct MinimizableView: View {
      func frameHeight()->CGFloat {
          
         if self.minimizableViewHandler.isMinimized {
-            return self.minimizableViewHandler.settings.minimizedHeight
+            
+            let draggedOffset: CGFloat = self.minimizableViewHandler.draggedOffset.height < 0 ? self.minimizableViewHandler.draggedOffset.height * (-1) : 0
+            return self.minimizableViewHandler.settings.minimizedHeight + draggedOffset
          } else {
             return geometry.size.height - self.minimizableViewHandler.settings.expandedTopMargin
          }

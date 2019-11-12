@@ -38,6 +38,8 @@ Select your project (not the target) and then select the Swift Packages tab. Cli
 
 Cocoapods:
 
+platform :ios, '13.0'
+
 target '[project name]' do
  	pod 'MinimizableView'
 end
@@ -54,7 +56,7 @@ import MinimizableView
 
 ## Usage
 
-Check out the following example. 
+Check out the following example. This repo only contains the Swift package, no example code. Please download the example project [here](https://github.com/DominikButz/MinimizableViewExample.git).
 
 
 ![MinimizableView example](gitResources/example01.gif) 
@@ -139,9 +141,10 @@ If you want a gray capsule shaped delimiter view at the top of your content (whi
 		VStack {
     			TopDelimiterAreaView(areaWidth: proxy.size.width).onTapGesture {
                   self.minimizableViewHandler.isMinimized.toggle()
+                   // other views    
             }
                     
-        /// other views             
+                
    }
 ```
 ### Code Example: VerticalDragGesture Recognizer
@@ -166,6 +169,9 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 ```
 
 ## Change log
+#### [Version 0.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/0.2.1)
+Updated frame height and offsetY functions to allow expanding the minimized frame when dragging upwards.
+
 #### [Version 0.2](https://github.com/DominikButz/MinimizableView/releases/tag/0.2)
 Initial public release. 
 
