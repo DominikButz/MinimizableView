@@ -21,14 +21,14 @@ Pod::Spec.new do |s|
 It can only be used from iOS 13.0 or iPadOS because SwiftUI is not supported in earlier iOS versions.
                        DESC
 
-  s.homepage         = 'https://github.com/DominikButz/MinimizableView'
+  s.homepage    = 'https://github.com/DominikButz/MinimizableView'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'dominikbutz' => 'dominikbutz@gmail.com' }
   s.source           = { :git => 'https://github.com/DominikButz/MinimizableView.git', :tag => s.version.to_s }
 
+ s.platform           = :ios
+ s.ios.deployment_target = '13.0'
 
-s.ios.deployment_target = '13.0'
- s.ipados.deployment_target = '13.0'
 
   s.source_files = 'Sources/**/*'
   #s.exclude_files = 'MinimizableView /**/*.plist'
