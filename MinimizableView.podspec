@@ -10,11 +10,6 @@ Pod::Spec.new do |s|
   s.summary          = 'SwiftUI view that minimises to the bottom of the screen similar to the mini-player in Apple Music or Spotify.'
   s.swift_version = '5.1'
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
     MinimizableView is a simple SwiftUI view for iOS and iPadOS that can minimise like the mini-player in the Spotify or Apple Music app. 

@@ -140,7 +140,7 @@ If you want a gray capsule shaped delimiter view at the top of your content (whi
 ```Swift
 		VStack {
     			TopDelimiterAreaView(areaWidth: proxy.size.width).onTapGesture {
-                  self.minimizableViewHandler.isMinimized.toggle()
+                  self.minimizableViewHandler.toggleExpansionState()
                    // other views    
             }
                     
