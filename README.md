@@ -64,7 +64,7 @@ Check out the following example. This repo only contains the Swift package, no e
 
 ### Code example: Content View (your main view)
 
-Make sure to embed your main view in a ZStack and the the ZStack in a GeometryReader. The MinimizableView must be added as last view within the ZStack. 
+Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alterantively, you can add it as the last view in a ZStack. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
 In the initializer of MinimizableView make sure to cast your content view and the compact view to AnyView (see below). The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
@@ -90,8 +90,7 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	    
 	    var body: some View {
 	        GeometryReader { proxy in
-	            ZStack {
-	                
+
 	                TabView(selection: self.$selectedTabIndex) {
 	                    
 	                    Button(action: {
@@ -115,13 +114,10 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	                    }.tag(2)
 	                    
 	                    
-	                }
+	                }.overlay(MinimizableView(content: AnyView(ContentExample()), compactView:AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler))
 	               
 		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
-	               MinimizableView(content: AnyView(ContentExample()), compactView: AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler)
-	        
-	            }
-	                      
+	                            
 	                
 	        }
 	    
