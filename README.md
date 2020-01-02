@@ -64,7 +64,7 @@ Check out the following example. This repo only contains the Swift package, no e
 
 ### Code example: Content View (your main view)
 
-Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alterantively, you can add it as the last view in a ZStack. 
+Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alternatively, you can add it as the last view in a ZStack. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
 In the initializer of MinimizableView make sure to cast your content view and the compact view to AnyView (see below). The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
@@ -114,7 +114,7 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	                    }.tag(2)
 	                    
 	                    
-	                }.overlay(MinimizableView(content: AnyView(ContentExample()), compactView:AnyView(CompactViewExample().modifier(VerticalDragGesture(translationHeightTriggerValue: 40))), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler))
+	                }.overlay(MinimizableView(content: AnyView(ContentExample()), compactView:AnyView(CompactViewExample().verticalDragGesture(translationHeightTriggerValue: 30)), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler))
 	               
 		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
 	                            
@@ -158,13 +158,16 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 	                Text("Compact View")
 	             }.frame(width: proxy.size.width, height: proxy.size.height).onTapGesture {
 	                    self.minimizableViewHandler.expand()
-	             }.background(Color(.secondarySystemBackground)).modifier(VerticalDragGesture(translationHeightTriggerValue: 40))
+	             }.background(Color(.secondarySystemBackground)).verticalDragGesture(translationHeightTriggerValue: 40))
 	        }
 	    }
 	}
 ```
 
 ## Change log
+#### [Version 0.3](https://github.com/DominikButz/MinimizableView/releases/tag/0.3)
+Expansion / minimization through the VerticalDragGesture modifier is now triggered only after the drag gesture ended. The VerticalDragGesture view modifier is now internal to the framework - instead *use the modifier function verticalDragGesture(translationHeightTriggerValue: CGFloat)*. Bug fixes. 
+
 #### [Version 0.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/0.2.1)
 Updated frame height and offsetY functions to allow expanding the minimized frame when dragging upwards.
 

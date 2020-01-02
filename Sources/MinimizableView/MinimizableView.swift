@@ -4,7 +4,7 @@
 //
 //  Created by Dominik Butz on 7/10/2019.
 //  Copyright © 2019 Duoyun. All rights reserved.
-//Version 0.2.1
+//Version 0.3
 
 import SwiftUI
 import Combine
@@ -18,12 +18,16 @@ public class MinimizableViewHandler: ObservableObject {
     Handler Initializer. Although it is empty, it is necessary to set it with the public keyword, otherwise the compiler will throw an error.
     */
     public init() {}
-    
+    /// settings
     public var settings =  Settings()
     
+    ///onPresentation closure
     public var onPresentation: (()->Void)?
+      ///onDismissal closure
     public var onDismissal:(()->Void)?
+      ///onExpansion closure
     public  var onExpansion: (()->Void)?
+      ///onMinimization closure
     public var onMinimization: (()->Void)?
     
     /**draggedOffset: The offset of the minimizable view's position. You can attach your own gesture recognizers to your content view or its subviews, e.g. to dismiss the minimizable view on swiping down.
@@ -113,7 +117,7 @@ public class MinimizableViewHandler: ObservableObject {
 
 public struct Settings {
     /// height of the view in minimized state.
-    public var minimizedHeight: CGFloat = 44.0
+    public var minimizedHeight: CGFloat = 48.0
     
     /// leading and trailing margin of the view.
     public var lateralMargin: CGFloat = 0
@@ -192,9 +196,7 @@ public struct MinimizableView: View {
    
         }
     }
-//       var positionY = self.minimizableViewHandler.isMinimized ? geometry.size.height  -  self.bottomMargin - (self.minimizableViewHandler.settings.minimizedHeight / 2) :  (geometry.size.height + self.minimizableViewHandler.settings.expandedTopMargin) / 2
-//        return positionY + self.minimizableViewHandler.draggedOffset.height
-//    }
+
 
     /**
     MinimizableView Initializer.
@@ -230,21 +232,22 @@ public struct MinimizableView: View {
             ZStack(alignment: .top) {
 
                 self.contentView
+                    
+                    //.opacity(self.minimizableViewHandler.isMinimized ? 0 : 1)
                 
                 if self.minimizableViewHandler.isMinimized && self.compactView != nil {
                     self.compactView!
 
                 }
-            }.background( RoundedRectangle(cornerRadius: 8)
-                .foregroundColor(self.minimizableViewHandler.settings.backgroundColor).shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
-            
+            }.clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)).background( RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)
+            .foregroundColor(self.minimizableViewHandler.settings.backgroundColor).shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
             .frame(
                 width: geometry.size.width - self.minimizableViewHandler.settings.lateralMargin * 2 ,
                 height: self.frameHeight())
             .position(CGPoint(x: geometry.size.width / 2, y: self.positionY()))
             .offset(y: self.offsetY())
-            .clipped()
             .animation(.spring())
+        
        
         
     }
@@ -254,7 +257,7 @@ public struct MinimizableView: View {
 /**
  VerticalDragGesture - a view modifier you can add to your content or compact view.
 */
-public struct VerticalDragGesture: ViewModifier {
+internal struct VerticalDragGesture: ViewModifier {
     
     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
     var translationHeightTriggerValue: CGFloat
@@ -276,30 +279,53 @@ public struct VerticalDragGesture: ViewModifier {
                 if self.minimizableViewHandler.isMinimized == false  { // expanded state
                     if value.translation.height > 0 {
                         self.minimizableViewHandler.draggedOffset = value.translation
-                        
-                        if value.translation.height > self.translationHeightTriggerValue {
-                            self.minimizableViewHandler.minimize()
-                            self.minimizableViewHandler.draggedOffset = CGSize.zero
-                        }
+
                     }
                 } else {// minimized state
                     
                     if value.translation.height < 0 {
                         self.minimizableViewHandler.draggedOffset = value.translation
-                        if value.translation.height < -self.translationHeightTriggerValue {
-                            self.minimizableViewHandler.expand()
-                             self.minimizableViewHandler.draggedOffset = CGSize.zero
-                        }
+
                     }
                 }
                 
             }).onEnded({ (value) in
+                
+                if self.minimizableViewHandler.isMinimized == false  {
+                    if value.translation.height > self.translationHeightTriggerValue {
+                          self.minimizableViewHandler.minimize()
+                   
+                    }
+                    
+                } else {
+                    if value.translation.height < -self.translationHeightTriggerValue {
+                          self.minimizableViewHandler.expand()
+            
+                      }
+                    
+                }
+                
                 self.minimizableViewHandler.draggedOffset = CGSize.zero
 
             }))
 
     }
 }
+
+/// wrapper for the Vertical Drag Gesture View Modifier. Add it to the header view of your MinimizableView content view and/ or to your compact view.
+public extension View {
+    /**
+     - Description: a vertical drag gesture view modifier
+     - Parameter translationHeightTriggerValue: the vertical distance the user needs to drag in order to trigger expansion / minimization of the MinimizableView
+     - Returns: a vertial drag gesture modifier.
+    */
+   public  func verticalDragGesture(translationHeightTriggerValue: CGFloat)-> some View {
+        
+       self.modifier(VerticalDragGesture(translationHeightTriggerValue: translationHeightTriggerValue))
+    }
+}
+
+
 
 /// An HStack view that shows a capsule shape delimiter. The whole view area is supposed to be larger than the capsule.
 public struct TopDelimiterAreaView: View {
