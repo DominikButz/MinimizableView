@@ -4,7 +4,7 @@
 //
 //  Created by Dominik Butz on 7/10/2019.
 //  Copyright © 2019 Duoyun. All rights reserved.
-//Version 0.3
+//Version 0.3.1
 
 import SwiftUI
 import Combine
@@ -117,13 +117,13 @@ public class MinimizableViewHandler: ObservableObject {
 
 public struct Settings {
     /// height of the view in minimized state.
-    public var minimizedHeight: CGFloat = 48.0
+    public var minimizedHeight: CGFloat = 44.0
     
     /// leading and trailing margin of the view.
     public var lateralMargin: CGFloat = 0
     
     /// the top margin of the view in expanded state.
-    public var expandedTopMargin: CGFloat = 10.0
+    public var expandedTopMargin: CGFloat = 0
     
     /// the background color of the view.
     public var backgroundColor: Color = Color(.systemBackground)
@@ -154,12 +154,12 @@ public struct MinimizableView: View {
     
     var contentView:  AnyView
     var compactView: AnyView?
-   
+    
 
      func offsetY()->CGFloat {
          
         if self.minimizableViewHandler.isPresented == false {
-            return geometry.size.height
+            return geometry.size.height + self.minimizableViewHandler.settings.shadowRadius + 5  // without the saftey margin the shadow will be visible at the bottom of the screen
          } else {
              // is presenting
             if self.minimizableViewHandler.isMinimized {
@@ -319,7 +319,7 @@ public extension View {
      - Parameter translationHeightTriggerValue: the vertical distance the user needs to drag in order to trigger expansion / minimization of the MinimizableView
      - Returns: a vertial drag gesture modifier.
     */
-   public  func verticalDragGesture(translationHeightTriggerValue: CGFloat)-> some View {
+    func verticalDragGesture(translationHeightTriggerValue: CGFloat)-> some View {
         
        self.modifier(VerticalDragGesture(translationHeightTriggerValue: translationHeightTriggerValue))
     }

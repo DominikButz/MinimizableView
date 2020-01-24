@@ -165,6 +165,9 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 ```
 
 ## Change log
+#### [Version 0.3.1](https://github.com/DominikButz/MinimizableView/releases/tag/0.3.1)
+Adding safety margin to offsetY when minimizable view presentation state is false - this fixes the shadow visibility bug at the bottom of the screen.
+
 #### [Version 0.3](https://github.com/DominikButz/MinimizableView/releases/tag/0.3)
 Expansion / minimization through the VerticalDragGesture modifier is now triggered only after the drag gesture ended. The VerticalDragGesture view modifier is now internal to the framework - instead *use the modifier function verticalDragGesture(translationHeightTriggerValue: CGFloat)*. Bug fixes. 
 
