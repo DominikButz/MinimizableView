@@ -4,7 +4,7 @@
 //
 //  Created by Dominik Butz on 7/10/2019.
 //  Copyright © 2019 Duoyun. All rights reserved.
-//Version 0.3.1
+//Version 0.3.2
 
 import SwiftUI
 import Combine
@@ -52,8 +52,9 @@ public class MinimizableViewHandler: ObservableObject {
         
         if self.isPresented == true {
             self.isPresented = false
-            
-            self.isMinimized = false
+            if self.isMinimized == true {
+                self.isMinimized = false
+            }
         }
     }
     
@@ -74,7 +75,6 @@ public class MinimizableViewHandler: ObservableObject {
     public func expand() {
         if self.isMinimized == true  {
             self.isMinimized = false
-           
         }
     }
     
@@ -82,8 +82,8 @@ public class MinimizableViewHandler: ObservableObject {
     Call this function to expand or minimize the MinimizableView. Useful in an onTapGesture-closure because you don't need to check the expansion state.
     */
     public func toggleExpansionState() {
-        
-        self.isMinimized.toggle()
+       self.isMinimized = self.isMinimized == true ? false : true
+  
     }
     
 
@@ -108,7 +108,9 @@ public class MinimizableViewHandler: ObservableObject {
             if isMinimized {
                 self.onMinimization?()
             } else {
-                self.onExpansion?()
+                if self.isPresented == true {
+                    self.onExpansion?()
+                }
             }
         }
     }
@@ -232,12 +234,9 @@ public struct MinimizableView: View {
             ZStack(alignment: .top) {
 
                 self.contentView
-                    
-                    //.opacity(self.minimizableViewHandler.isMinimized ? 0 : 1)
-                
+  
                 if self.minimizableViewHandler.isMinimized && self.compactView != nil {
                     self.compactView!
-
                 }
             }.clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)).background( RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)
             .foregroundColor(self.minimizableViewHandler.settings.backgroundColor).shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))

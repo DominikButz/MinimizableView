@@ -165,6 +165,10 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 ```
 
 ## Change log
+
+#### [Version 0.3.2](https://github.com/DominikButz/MinimizableView/releases/tag/0.3.2)
+Bug fixes: onMinimization is now called as expected. onExpansion is only called when isPresented is true. 
+
 #### [Version 0.3.1](https://github.com/DominikButz/MinimizableView/releases/tag/0.3.1)
 Adding safety margin to offsetY when minimizable view presentation state is false - this fixes the shadow visibility bug at the bottom of the screen.
 
