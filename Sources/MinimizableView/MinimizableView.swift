@@ -17,9 +17,13 @@ public class MinimizableViewHandler: ObservableObject {
     /**
     Handler Initializer. Although it is empty, it is necessary to set it with the public keyword, otherwise the compiler will throw an error.
     */
-    public init() {}
+    public init(settings: MiniSettings? = nil) {
+        if let settings = settings {
+            self.settings = settings
+        }
+    }
     /// settings
-    public var settings =  Settings()
+    @Published public var settings =  MiniSettings()
     
     ///onPresentation closure
     public var onPresentation: (()->Void)?
@@ -117,9 +121,14 @@ public class MinimizableViewHandler: ObservableObject {
 }
 
 
-public struct Settings {
+public struct MiniSettings {
+
+    public init() {}
+    
     /// height of the view in minimized state.
     public var minimizedHeight: CGFloat = 44.0
+    
+    public var bottomMargin: CGFloat = 48
     
     /// leading and trailing margin of the view.
     public var lateralMargin: CGFloat = 0
@@ -131,7 +140,7 @@ public struct Settings {
     public var backgroundColor: Color = Color(.systemBackground)
     
     /// the corner radius of the view. only the top two corners are visible.
-    public var cornerRadius: CGFloat  = 8.0
+    public var cornerRadius: CGFloat  = 10.0
     
     /// the shadow color of the view.
     public var shadowColor: Color = Color(.systemGray2)
@@ -143,31 +152,28 @@ public struct Settings {
 /**
 MinimizableView.
 */
-public struct MinimizableView: View {
+public struct MinimizableView<MainContent: View, CompactContent: View>: View {
     
     /**
     MinimizableView Handler. must be attached to the MinimizableView.
     */
     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
 
-    let bottomMargin: CGFloat
-
     var geometry: GeometryProxy
-    
-    var contentView:  AnyView
-    var compactView: AnyView?
+    var contentView:  ()-> MainContent
+    var compactView: (()-> CompactContent)?
     
 
      func offsetY()->CGFloat {
          
         if self.minimizableViewHandler.isPresented == false {
-            return geometry.size.height + self.minimizableViewHandler.settings.shadowRadius + 5  // without the saftey margin the shadow will be visible at the bottom of the screen
+            return UIScreen.main.bounds.height + self.minimizableViewHandler.settings.shadowRadius   // without the saftey margin the shadow will be visible at the bottom of the screen. for iphone 10 upwards, top part of mini view would even be visible...
          } else {
              // is presenting
             if self.minimizableViewHandler.isMinimized {
                 return self.minimizableViewHandler.draggedOffset.height < 0 ? self.minimizableViewHandler.draggedOffset.height / 2: 0
             } else {
-                // in expanded state, only return offset if dragging down
+                // in expanded state, only return offset > 0 if dragging down
                  return self.minimizableViewHandler.draggedOffset.height > 0 ? self.minimizableViewHandler.draggedOffset.height  : 0
             }
            
@@ -190,7 +196,7 @@ public struct MinimizableView: View {
     func positionY()->CGFloat {
 
         if self.minimizableViewHandler.isMinimized {
-          return geometry.size.height - self.bottomMargin - self.minimizableViewHandler.settings.minimizedHeight / 2
+            return geometry.size.height - self.minimizableViewHandler.settings.bottomMargin - self.minimizableViewHandler.settings.minimizedHeight / 2
          
         } else {
 
@@ -215,43 +221,71 @@ public struct MinimizableView: View {
      
     - Parameter geometry: Embed the ZStack, in which the MinimizableView resides, in a geometry reader.  This will allow the MinimizableView to adapt to a changing screen orientation.
     */
-    public init<V>(content: V, compactView: V?, bottomMargin: CGFloat, geometry: GeometryProxy) where V: View {
+    public init(content: @escaping ()->MainContent, compactView: ( ()->CompactContent)?, geometry: GeometryProxy) {
         
-        self.contentView = AnyView(content)
-        self.compactView = AnyView(compactView)
+        self.contentView = content
+        self.compactView = compactView
         self.geometry = geometry
-        self.bottomMargin = bottomMargin
 
-   
     }
+    
+//    public init<V>(content: ()->some View, compactView: V?, geometry: GeometryProxy) where V: View {
+//
+//        self.contentView = AnyView(content)
+//        self.compactView = AnyView(compactView)
+//        self.geometry = geometry
+//
+//    }
     
     /**
        Body of the MinimizableView.
     */
     public var body: some View {
-
-            
-            ZStack(alignment: .top) {
-
-                self.contentView
   
-                if self.minimizableViewHandler.isMinimized && self.compactView != nil {
-                    self.compactView!
-                }
-            }.clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)).background( RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)
-            .foregroundColor(self.minimizableViewHandler.settings.backgroundColor).shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
-            .frame(
-                width: geometry.size.width - self.minimizableViewHandler.settings.lateralMargin * 2 ,
-                height: self.frameHeight())
+            ZStack(alignment: .top) {
+              //  if self.minimizableViewHandler.isPresented == true {
+                    self.contentView()
+      
+                    if self.minimizableViewHandler.isMinimized && self.compactView?() != nil {
+                        self.compactView!().transition(AnyTransition.opacity).animation(.easeInOut)
+                    }
+               // }
+            }
+            .frame(width: geometry.size.width - self.minimizableViewHandler.settings.lateralMargin * 2 ,
+                  height: self.frameHeight())
+            .clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius))
+            .background(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)
+                            .foregroundColor(self.minimizableViewHandler.settings.backgroundColor)
+                            .shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
             .position(CGPoint(x: geometry.size.width / 2, y: self.positionY()))
             .offset(y: self.offsetY())
             .animation(.spring())
-        
-       
-        
+  
     }
     
 }
+
+struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModifier {
+     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
+        
+      var contentView:  ()-> MainContent
+      var compactView: (()-> CompactContent)?
+      var geometry: GeometryProxy
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(MinimizableView(content: contentView, compactView: compactView, geometry: geometry).environmentObject(self.minimizableViewHandler))
+    }
+}
+
+public extension View {
+    
+    func minimizableView<MainContent: View, CompactContent: View>(content: @escaping ()->MainContent, compactView: (()->CompactContent)?, geometry: GeometryProxy)->some View  {
+        self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, geometry: geometry))
+    }
+    
+}
+
 
 /**
  VerticalDragGesture - a view modifier you can add to your content or compact view.

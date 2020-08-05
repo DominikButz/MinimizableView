@@ -19,6 +19,7 @@ You need to add the MinimizableView package either through cocoapods or the Swif
 * By changing the setting properties of the MinimizableViewHandler, you can customize the following properties:
 	- minimizedHeight
 	- lateralMargin
+    - bottomMargin
 	- expandedTopMargin
 	- backgroundColor
 	- cornerRadius
@@ -67,7 +68,7 @@ Check out the following example. This repo only contains the Swift package, no e
 Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alternatively, you can add it as the last view in a ZStack. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
-In the initializer of MinimizableView make sure to cast your content view and the compact view to AnyView (see below). The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
+ The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
 
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
@@ -114,7 +115,8 @@ You also need to attach the minimizableViewHandler as environment object to the 
 	                    }.tag(2)
 	                    
 	                    
-	                }.overlay(MinimizableView(content: AnyView(ContentExample()), compactView:AnyView(CompactViewExample().verticalDragGesture(translationHeightTriggerValue: 30)), bottomMargin: 50.0, geometry: proxy).environmentObject(self.minimizableViewHandler))
+	                }.minimizableView(content: {ContentExample()}, compactView: {CompactViewExample()}, geometry: proxy).environmentObject(self.minimizableViewHandler)
+                    .verticalDragGesture(translationHeightTriggerValue: 30)), bottomMargin: 50.0, geometry: proxy)
 	               
 		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
 	                            
@@ -165,6 +167,9 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 ```
 
 ## Change log
+
+#### [Version 1.0](https://github.com/DominikButz/MinimizableView/releases/tag/1.0)
+Breaking change of initializer: Content view and compact view now need to be inserted into closures, no more casting to AnyView! Bug fix: top of mini view does not show any more when in hidden state in case the UI device is without home button (e.g. iPhone 11 max). Bonus: convenience modifier (see example).
 
 #### [Version 0.3.2](https://github.com/DominikButz/MinimizableView/releases/tag/0.3.2)
 Bug fixes: onMinimization is now called as expected. onExpansion is only called when isPresented is true. 
