@@ -160,11 +160,11 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
 
     var geometry: GeometryProxy
-    var contentView:  ()-> MainContent
-    var compactView: (()-> CompactContent)?
+    var contentView:  MainContent
+    var compactView: CompactContent?
     
 
-     func offsetY()->CGFloat {
+    var offsetY: CGFloat {
          
         if self.minimizableViewHandler.isPresented == false {
             return UIScreen.main.bounds.height + self.minimizableViewHandler.settings.shadowRadius   // without the saftey margin the shadow will be visible at the bottom of the screen. for iphone 10 upwards, top part of mini view would even be visible...
@@ -182,7 +182,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
 
      }
      
-     func frameHeight()->CGFloat {
+    var frameHeight: CGFloat {
          
         if self.minimizableViewHandler.isMinimized {
             
@@ -193,7 +193,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
          }
      }
     
-    func positionY()->CGFloat {
+    var positionY: CGFloat {
 
         if self.minimizableViewHandler.isMinimized {
             return geometry.size.height - self.minimizableViewHandler.settings.bottomMargin - self.minimizableViewHandler.settings.minimizedHeight / 2
@@ -221,10 +221,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
      
     - Parameter geometry: Embed the ZStack, in which the MinimizableView resides, in a geometry reader.  This will allow the MinimizableView to adapt to a changing screen orientation.
     */
-    public init(content: @escaping ()->MainContent, compactView: ( ()->CompactContent)?, geometry: GeometryProxy) {
+    public init(@ViewBuilder content: ()->MainContent, compactView: ( ()->CompactContent)?, geometry: GeometryProxy) {
         
-        self.contentView = content
-        self.compactView = compactView
+        self.contentView = content()
+        self.compactView = compactView?()
         self.geometry = geometry
 
     }
@@ -243,22 +243,22 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
     public var body: some View {
   
             ZStack(alignment: .top) {
-              //  if self.minimizableViewHandler.isPresented == true {
-                    self.contentView()
+                if self.minimizableViewHandler.isPresented == true {
+                    self.contentView.transition(AnyTransition.move(edge: .bottom))
       
-                    if self.minimizableViewHandler.isMinimized && self.compactView?() != nil {
-                        self.compactView!().transition(AnyTransition.opacity).animation(.easeInOut)
+                    if self.minimizableViewHandler.isMinimized && self.compactView != nil {
+                        self.compactView!.transition(AnyTransition.opacity).animation(.easeInOut)
                     }
-               // }
+               }
             }
             .frame(width: geometry.size.width - self.minimizableViewHandler.settings.lateralMargin * 2 ,
-                  height: self.frameHeight())
+                  height: self.frameHeight)
             .clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius))
             .background(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius)
                             .foregroundColor(self.minimizableViewHandler.settings.backgroundColor)
                             .shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
-            .position(CGPoint(x: geometry.size.width / 2, y: self.positionY()))
-            .offset(y: self.offsetY())
+            .position(CGPoint(x: geometry.size.width / 2, y: self.positionY))
+            .offset(y: self.offsetY)
             .animation(.spring())
   
     }
@@ -280,7 +280,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModi
 
 public extension View {
     
-    func minimizableView<MainContent: View, CompactContent: View>(content: @escaping ()->MainContent, compactView: (()->CompactContent)?, geometry: GeometryProxy)->some View  {
+    func minimizableView<MainContent: View, CompactContent: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: (()->CompactContent)?, geometry: GeometryProxy)->some View  {
         self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, geometry: geometry))
     }
     

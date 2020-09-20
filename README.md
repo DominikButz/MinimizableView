@@ -168,6 +168,9 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 
 ## Change log
 
+#### [Version 1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1)
+Content view now only appears if the mini view is presented. Other minor improvements.
+
 #### [Version 1.0](https://github.com/DominikButz/MinimizableView/releases/tag/1.0)
 Breaking change of initializer: Content view and compact view now need to be inserted into closures, no more casting to AnyView! Bug fix: top of mini view does not show any more when in hidden state in case the UI device is without home button (e.g. iPhone 11 max). Bonus: convenience modifier (see example).
 
