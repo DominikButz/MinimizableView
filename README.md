@@ -168,6 +168,9 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 
 ## Change log
 
+#### [Version 1.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1)
+Slight animation improvement.
+
 #### [Version 1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1)
 Content view now only appears if the mini view is presented. Other minor improvements.
 

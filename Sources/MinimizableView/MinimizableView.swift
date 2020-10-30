@@ -244,10 +244,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
   
             ZStack(alignment: .top) {
                 if self.minimizableViewHandler.isPresented == true {
-                    self.contentView.transition(AnyTransition.move(edge: .bottom))
-      
+                    self.contentView.transition(AnyTransition.move(edge: .bottom).animation(.easeInOut(duration: 0.5)))
+               
                     if self.minimizableViewHandler.isMinimized && self.compactView != nil {
-                        self.compactView!.transition(AnyTransition.opacity).animation(.easeInOut)
+                        self.compactView!.transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(.easeIn(duration: 0.5)), removal: AnyTransition.opacity.animation(.easeOut(duration: 0.1))))
                     }
                }
             }
