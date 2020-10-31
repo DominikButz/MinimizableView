@@ -68,7 +68,7 @@ Check out the following example. This repo only contains the Swift package, no e
 Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alternatively, you can add it as the last view in a ZStack. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
- The compact view parameter is optional. if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. 
+ If you don't want a compact view, just pass in an EmptyView. The code in the body of MinimizableView checks if compactView is an EmptyView and then does not display it.  if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. Use the minimizableViewHandler as EnvironmentObject in your content view - e.g. to remove and insert certain subviews once the minimized property changes. 
 
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
@@ -79,16 +79,9 @@ You also need to attach the minimizableViewHandler as environment object to the 
 
 	struct ContentView: View {
 		
-	    var minimizableViewHandler: MinimizableViewHandler = MinimizableViewHandler()
+        @ObservedObject var minimizableViewHandler: MinimizableViewHandler = MinimizableViewHandler(settings: MiniSettings(lateralMargin:10, backgroundColor: Color(.secondarySystemBackground)))
 	    @State var selectedTabIndex: Int = 0
-	    
-	    init() {
-	        
-	        self.minimizableViewHandler.settings.backgroundColor = Color(.secondarySystemBackground)
-	        self.minimizableViewHandler.settings.lateralMargin = 10
-	        // change other settings if deemed necessary.
-	    }
-	    
+	    	    
 	    var body: some View {
 	        GeometryReader { proxy in
 
@@ -168,7 +161,12 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 
 ## Change log
 
-#### [Version 1.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1)
+#### [Version 1.2](https://github.com/DominikButz/MinimizableView/releases/tag/1.2)
+The compactView parameter cannot be nil (a type conforming to View apparently can't be nil). Workaround: If you don't want a separate compactView, pass in an EmptyView. 
+Removed transitions from minimizableView body (contentView and compactView). Instead, attach the transition modifier to your implementation of conentView and compactView. Check out the example repository for details.
+Parameters of the MiniSettings struct can now be set directly in the initializer.
+
+#### [Version 1.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1.1)
 Slight animation improvement.
 
 #### [Version 1.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.1)

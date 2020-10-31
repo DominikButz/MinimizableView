@@ -9,145 +9,6 @@
 import SwiftUI
 import Combine
 
-/**
-Handler for MinimizableView. Must be attached as Environment Object to Minimizable View, to your content view parameter and to your compact view parameter.
-*/
-public class MinimizableViewHandler: ObservableObject {
- 
-    /**
-    Handler Initializer. Although it is empty, it is necessary to set it with the public keyword, otherwise the compiler will throw an error.
-    */
-    public init(settings: MiniSettings? = nil) {
-        if let settings = settings {
-            self.settings = settings
-        }
-    }
-    /// settings
-    @Published public var settings =  MiniSettings()
-    
-    ///onPresentation closure
-    public var onPresentation: (()->Void)?
-      ///onDismissal closure
-    public var onDismissal:(()->Void)?
-      ///onExpansion closure
-    public  var onExpansion: (()->Void)?
-      ///onMinimization closure
-    public var onMinimization: (()->Void)?
-    
-    /**draggedOffset: The offset of the minimizable view's position. You can attach your own gesture recognizers to your content view or its subviews, e.g. to dismiss the minimizable view on swiping down.
- */
-    @Published public var draggedOffset = CGSize.zero
-    /**
-    Call this function to present the minimizable view instead of setting isPresented to true directly.
-    */
-    public func present() {
-        
-        if self.isPresented == false {
-            self.isPresented = true
-            
-        }
-  
-    }
-    
-    /**
-    Call this function to dismiss the minimizable view instead of setting isPresented to false directly.
-    */
-    public func dismiss() {
-        
-        if self.isPresented == true {
-            self.isPresented = false
-            if self.isMinimized == true {
-                self.isMinimized = false
-            }
-        }
-    }
-    
-    /**
-    Call this function to minimize the minimizable view instead of setting  isMinimized to true directly.
-    */
-    public func minimize() {
-        
-        if self.isMinimized == false  {
-            self.isMinimized = true
-            
-        }
-    }
-    
-    /**
-    Call this function to expand the minimizable view instead of setting i  isMinimized to false directly.
-    */
-    public func expand() {
-        if self.isMinimized == true  {
-            self.isMinimized = false
-        }
-    }
-    
-    /**
-    Call this function to expand or minimize the MinimizableView. Useful in an onTapGesture-closure because you don't need to check the expansion state.
-    */
-    public func toggleExpansionState() {
-       self.isMinimized = self.isMinimized == true ? false : true
-  
-    }
-    
-
-    /**
-    Published variable  get the presentation state of the minimizable view.
-    */
-    @Published public var isPresented: Bool = false {
-        didSet {
-            if isPresented {
-                self.onPresentation?()
-            } else {
-                self.onDismissal?()
-            }
-        }
-    }
-    
-    /**
-    Published variable get the expansion state of the minimizable view.
-    */
-    @Published  public var isMinimized: Bool = false {
-        didSet {
-            if isMinimized {
-                self.onMinimization?()
-            } else {
-                if self.isPresented == true {
-                    self.onExpansion?()
-                }
-            }
-        }
-    }
-}
-
-
-public struct MiniSettings {
-
-    public init() {}
-    
-    /// height of the view in minimized state.
-    public var minimizedHeight: CGFloat = 44.0
-    
-    public var bottomMargin: CGFloat = 48
-    
-    /// leading and trailing margin of the view.
-    public var lateralMargin: CGFloat = 0
-    
-    /// the top margin of the view in expanded state.
-    public var expandedTopMargin: CGFloat = 0
-    
-    /// the background color of the view.
-    public var backgroundColor: Color = Color(.systemBackground)
-    
-    /// the corner radius of the view. only the top two corners are visible.
-    public var cornerRadius: CGFloat  = 10.0
-    
-    /// the shadow color of the view.
-    public var shadowColor: Color = Color(.systemGray2)
-    
-    /// the shadow radius of the view.
-    public var shadowRadius: CGFloat = 5.0
-}
 
 /**
 MinimizableView.
@@ -161,7 +22,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
 
     var geometry: GeometryProxy
     var contentView:  MainContent
-    var compactView: CompactContent?
+    var compactView: CompactContent
     
 
     var offsetY: CGFloat {
@@ -221,10 +82,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
      
     - Parameter geometry: Embed the ZStack, in which the MinimizableView resides, in a geometry reader.  This will allow the MinimizableView to adapt to a changing screen orientation.
     */
-    public init(@ViewBuilder content: ()->MainContent, compactView: ( ()->CompactContent)?, geometry: GeometryProxy) {
+    public init(@ViewBuilder content: ()->MainContent, compactView: ()->CompactContent, geometry: GeometryProxy) {
         
         self.contentView = content()
-        self.compactView = compactView?()
+        self.compactView = compactView()
         self.geometry = geometry
 
     }
@@ -244,10 +105,11 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
   
             ZStack(alignment: .top) {
                 if self.minimizableViewHandler.isPresented == true {
-                    self.contentView.transition(AnyTransition.move(edge: .bottom).animation(.easeInOut(duration: 0.5)))
-               
-                    if self.minimizableViewHandler.isMinimized && self.compactView != nil {
-                        self.compactView!.transition(AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(.easeIn(duration: 0.5)), removal: AnyTransition.opacity.animation(.easeOut(duration: 0.1))))
+                    self.contentView
+                  
+                    if self.minimizableViewHandler.isMinimized && (self.compactView is EmptyView) == false {
+                        self.compactView
+                       
                     }
                }
             }
@@ -269,7 +131,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModi
      @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
         
       var contentView:  ()-> MainContent
-      var compactView: (()-> CompactContent)?
+      var compactView: ()-> CompactContent
       var geometry: GeometryProxy
     
     func body(content: Content) -> some View {
@@ -280,7 +142,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModi
 
 public extension View {
     
-    func minimizableView<MainContent: View, CompactContent: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: (()->CompactContent)?, geometry: GeometryProxy)->some View  {
+    func minimizableView<MainContent: View, CompactContent: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: @escaping ()->CompactContent, geometry: GeometryProxy)->some View  {
         self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, geometry: geometry))
     }
     
