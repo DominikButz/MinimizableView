@@ -161,8 +161,11 @@ Add a VerticalDragGesture as modifier to your compact view. If the user swipes u
 
 ## Change log
 
+#### [Version1.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.2.1)
+Bug fix: when in minimized state, the mini view will disappear if the keyboard shows (instead of floating above the keyboard).
+
 #### [Version 1.2](https://github.com/DominikButz/MinimizableView/releases/tag/1.2)
-The compactView parameter cannot be nil (a type conforming to View apparently can't be nil). Workaround: If you don't want a separate compactView, pass in an EmptyView. 
+The compactView parameter cannot be nil. If you don't want a separate compactView, pass in an EmptyView. 
 Removed transitions from minimizableView body (contentView and compactView). Instead, attach the transition modifier to your implementation of conentView and compactView. Check out the example repository for details.
 Parameters of the MiniSettings struct can now be set directly in the initializer.
 

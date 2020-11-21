@@ -24,7 +24,6 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
     var contentView:  MainContent
     var compactView: CompactContent
     
-
     var offsetY: CGFloat {
          
         if self.minimizableViewHandler.isPresented == false {
@@ -48,7 +47,9 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
         if self.minimizableViewHandler.isMinimized {
             
             let draggedOffset: CGFloat = self.minimizableViewHandler.draggedOffset.height < 0 ? self.minimizableViewHandler.draggedOffset.height * (-1) : 0
-            return self.minimizableViewHandler.settings.minimizedHeight + draggedOffset
+            let height = self.minimizableViewHandler.isVisible ? self.minimizableViewHandler.settings.minimizedHeight + draggedOffset : 0
+            print("height \(height)")
+            return height
          } else {
             return geometry.size.height - self.minimizableViewHandler.settings.expandedTopMargin
          }
@@ -135,8 +136,13 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModi
       var geometry: GeometryProxy
     
     func body(content: Content) -> some View {
-        content
-            .overlay(MinimizableView(content: contentView, compactView: compactView, geometry: geometry).environmentObject(self.minimizableViewHandler))
+        ZStack {
+       
+            content
+ 
+            MinimizableView(content: contentView, compactView: compactView, geometry: geometry).environmentObject(self.minimizableViewHandler)
+            
+        }
     }
 }
 
@@ -246,6 +252,37 @@ public struct TopDelimiterAreaView: View {
         
     }
 }
+
+//internal class KeyboardNotifier: ObservableObject {
+//
+//    private var notificationCentre: NotificationCenter
+//
+//    @Published var currentHeight: CGFloat = 0
+//
+//    init() {
+//        self.notificationCentre =  NotificationCenter.default
+//
+//        notificationCentre.addObserver(self, selector: #selector(keyBoardDidShow(notification:)), name: UIResponder.keyboardDidShowNotification, object: nil)
+//        notificationCentre.addObserver(self, selector: #selector(keyBoardDidHide(notification:)), name: UIResponder.keyboardDidHideNotification, object: nil)
+//    }
+//
+//    deinit {
+//        notificationCentre.removeObserver(self)
+//    }
+//
+//    @objc func keyBoardDidShow(notification: Notification) {
+//     //   self.objectWillChange.send()
+//        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+//               currentHeight = keyboardSize.height
+//           }
+//    }
+//
+//    @objc func keyBoardDidHide(notification: Notification) {
+//  //      self.objectWillChange.send()
+//        currentHeight = 0
+//    }
+//
+//}
 
 
 

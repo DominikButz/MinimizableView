@@ -13,6 +13,7 @@ Handler for MinimizableView. Must be attached as Environment Object to Minimizab
 */
 public class MinimizableViewHandler: ObservableObject {
  
+    var keyboardResponder: KeyboardNotifier?
     /**
     Handler Initializer.
       - Parameter settings: See MiniSettings for details. can be nil - if nil, the default values will be set.
@@ -21,6 +22,15 @@ public class MinimizableViewHandler: ObservableObject {
         if let settings = settings {
             self.settings = settings
         }
+        
+        self.keyboardResponder = KeyboardNotifier(keyboardWillShow: {
+            if self.isMinimized {
+                self.isVisible = false
+            }
+        }, keyboardWillHide: {
+            self.isVisible = true
+        })
+        
     }
     /// settings
     @Published public var settings =  MiniSettings()
@@ -37,6 +47,9 @@ public class MinimizableViewHandler: ObservableObject {
     /**draggedOffset: The offset of the minimizable view's position. You can attach your own gesture recognizers to your content view or its subviews, e.g. to dismiss the minimizable view on swiping down.
  */
     @Published public var draggedOffset = CGSize.zero
+    
+    
+    @Published internal var isVisible = true
     /**
     Call this function to present the minimizable view instead of setting isPresented to true directly.
     */
@@ -145,6 +158,7 @@ public struct MiniSettings {
         self.cornerRadius = cornerRadius
         self.shadowColor = shadowColor
         self.shadowRadius = shadowRadius
+
         
     }
     
@@ -162,7 +176,7 @@ public struct MiniSettings {
     
     /// the background color of the view.
     public var backgroundColor: Color
-    
+
     /// the corner radius of the view. only the top two corners are visible.
     public var cornerRadius: CGFloat
     
@@ -171,4 +185,34 @@ public struct MiniSettings {
     
     /// the shadow radius of the view.
     public var shadowRadius: CGFloat
+}
+
+
+
+internal class KeyboardNotifier: ObservableObject {
+   
+    private var notificationCentre: NotificationCenter
+    
+    var keyboardWillShow: (()->Void)?
+    var keyboardWillHide:(()->Void)?
+    
+    init(keyboardWillShow:  (()->Void)?, keyboardWillHide: (()->Void)?) {
+        self.notificationCentre =  NotificationCenter.default
+        notificationCentre.addObserver(self, selector: #selector(keyBoardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        notificationCentre.addObserver(self, selector: #selector(keyBoardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        self.keyboardWillShow = keyboardWillShow
+        self.keyboardWillHide = keyboardWillHide
+    }
+
+    deinit {
+        notificationCentre.removeObserver(self)
+    }
+
+    @objc func keyBoardWillShow(notification: Notification) {
+        self.keyboardWillShow?()
+    }
+
+    @objc func keyBoardWillHide(notification: Notification) {
+        self.keyboardWillHide?()
+    }
 }
