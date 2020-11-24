@@ -56,7 +56,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func present() {
         
         if self.isPresented == false {
-            self.isPresented = true
+            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+                self.isPresented = true
+            }
             
         }
   
@@ -68,7 +70,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func dismiss() {
         
         if self.isPresented == true {
-            self.isPresented = false
+            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+                self.isPresented = false
+            }
             if self.isMinimized == true {
                 self.isMinimized = false
             }
@@ -81,8 +85,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func minimize() {
         
         if self.isMinimized == false  {
-            self.isMinimized = true
-            
+            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+                self.isMinimized = true
+            }
         }
     }
     
@@ -91,7 +96,9 @@ public class MinimizableViewHandler: ObservableObject {
     */
     public func expand() {
         if self.isMinimized == true  {
-            self.isMinimized = false
+            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+                    self.isMinimized = false
+            }
         }
     }
     
@@ -99,8 +106,12 @@ public class MinimizableViewHandler: ObservableObject {
     Call this function to expand or minimize the MinimizableView. Useful in an onTapGesture-closure because you don't need to check the expansion state.
     */
     public func toggleExpansionState() {
-       self.isMinimized = self.isMinimized == true ? false : true
-  
+        if self.isMinimized {
+            self.expand()
+        } else {
+            self.minimize()
+        }
+
     }
     
 

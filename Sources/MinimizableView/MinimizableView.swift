@@ -34,7 +34,8 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
                 return self.minimizableViewHandler.draggedOffset.height < 0 ? self.minimizableViewHandler.draggedOffset.height / 2: 0
             } else {
                 // in expanded state, only return offset > 0 if dragging down
-                 return self.minimizableViewHandler.draggedOffset.height > 0 ? self.minimizableViewHandler.draggedOffset.height  : 0
+                return self.minimizableViewHandler.draggedOffset.height
+                // return self.minimizableViewHandler.draggedOffset.height > 0 ? self.minimizableViewHandler.draggedOffset.height  : 0
             }
            
 
@@ -122,8 +123,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View>: View {
                             .shadow(color:  self.minimizableViewHandler.settings.shadowColor, radius: self.minimizableViewHandler.settings.shadowRadius, x: 0, y: -5))
             .position(CGPoint(x: geometry.size.width / 2, y: self.positionY))
             .offset(y: self.offsetY)
-            .animation(.spring())
-  
+
     }
     
 }
@@ -136,7 +136,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View>: ViewModi
       var geometry: GeometryProxy
     
     func body(content: Content) -> some View {
-        ZStack {
+        ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
        
             content
  
