@@ -18,11 +18,8 @@ public class MinimizableViewHandler: ObservableObject {
     Handler Initializer.
       - Parameter settings: See MiniSettings for details. can be nil - if nil, the default values will be set.
     */
-    public init(settings: MiniSettings? = nil) {
-        if let settings = settings {
-            self.settings = settings
-        }
-        
+    public init() {
+
         self.keyboardResponder = KeyboardNotifier(keyboardWillShow: {
             if self.isMinimized {
                 self.isVisible = false
@@ -32,9 +29,6 @@ public class MinimizableViewHandler: ObservableObject {
         })
         
     }
-    /// settings
-    @Published public var settings =  MiniSettings()
-    
     ///onPresentation closure
     public var onPresentation: (()->Void)?
       ///onDismissal closure
@@ -46,7 +40,7 @@ public class MinimizableViewHandler: ObservableObject {
     
     /**draggedOffset: The offset of the minimizable view's position. You can attach your own gesture recognizers to your content view or its subviews, e.g. to dismiss the minimizable view on swiping down.
  */
-    @Published public var draggedOffset = CGSize.zero
+    @Published public var draggedOffsetY: CGFloat = 0
     
     
     @Published internal var isVisible = true
@@ -56,10 +50,7 @@ public class MinimizableViewHandler: ObservableObject {
     public func present() {
         
         if self.isPresented == false {
-            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
-                self.isPresented = true
-            }
-            
+            self.isPresented = true
         }
   
     }
@@ -70,9 +61,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func dismiss() {
         
         if self.isPresented == true {
-            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
-                self.isPresented = false
-            }
+
+            self.isPresented = false
+            
             if self.isMinimized == true {
                 self.isMinimized = false
             }
@@ -85,9 +76,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func minimize() {
         
         if self.isMinimized == false  {
-            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
-                self.isMinimized = true
-            }
+     
+            self.isMinimized = true
+            
         }
     }
     
@@ -96,9 +87,9 @@ public class MinimizableViewHandler: ObservableObject {
     */
     public func expand() {
         if self.isMinimized == true  {
-            withAnimation(.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
-                    self.isMinimized = false
-            }
+
+            self.isMinimized = false
+            
         }
     }
     
@@ -145,57 +136,38 @@ public class MinimizableViewHandler: ObservableObject {
 }
 
 /**
- Settings to pass in as parameter into the initializer of the mini handler
+ Settings to pass in as parameter into the initializer of mini view
 */
 public struct MiniSettings {
 
     /**
     Initializer
      - Parameter minimizedHeight:  height of the view in minimized state.
-     - Parameter bottomMargin: distance of the miniView from the bottom edge in minimized state.
+     - Parameter overrideHeight: The height  of the miniView in expanded state.If you prefer to set a custom height, you can set this value. Default value is nil, which means it will be set automatically to fill the available vertical space.
+     - Parameter minimizedBottomMargin: The vertical offset from the bottom edge in minimized state. e.g. useful if the mini view shall sit on a tab view.
      - Parameter lateralMargin: leading and trailing margin of the view.
-     - Parameter  expandedTopMargin: the top margin of the  mini view in expanded state.
-     - Parameter backgroundColor:the background color of the mini view.
-     - Parameter cornerRadius: the corner radius of the mini view. only the two top corners are visible in expanded state.
-    - Parameter shadowColor: the background shadow color of the  mini view.
-    - Parameter shadowRadius: the shadow radius of the mini view background shadow.
+     - Parameter animation: for exansion and compression. default value is an interactive spring animation.
     */
-    public init(minimizedHeight: CGFloat = 44.0, bottomMargin:CGFloat = 48, lateralMargin: CGFloat = 0, expandedTopMargin: CGFloat = 0, backgroundColor: Color = Color(.systemBackground), cornerRadius: CGFloat = 10, shadowColor: Color =  Color(.systemGray2), shadowRadius: CGFloat = 5) {
+    public init(minimizedHeight: CGFloat = 60, minimizedBottomMargin: CGFloat = 48, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, animation: Animation = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
         self.minimizedHeight = minimizedHeight
-        self.bottomMargin = bottomMargin
+        self.overrideHeight = overrideHeight
+        self.minimizedBottomMargin = minimizedBottomMargin
         self.lateralMargin = lateralMargin
-        self.expandedTopMargin = expandedTopMargin
-        self.backgroundColor = backgroundColor
-        self.cornerRadius = cornerRadius
-        self.shadowColor = shadowColor
-        self.shadowRadius = shadowRadius
-
-        
+        self.animation = animation
+ 
     }
-    
-    /// height of the view in minimized state.
-    public var minimizedHeight: CGFloat
-    
-    /// distance of the miniView from the bottom edge in minimized state.
-    public var bottomMargin: CGFloat
-    
-    /// leading and trailing margin of the view.
-    public var lateralMargin: CGFloat
-    
-    /// the top margin of the view in expanded state.
-    public var expandedTopMargin: CGFloat
-    
-    /// the background color of the view.
-    public var backgroundColor: Color
 
-    /// the corner radius of the view. only the top two corners are visible.
-    public var cornerRadius: CGFloat
+    var minimizedHeight: CGFloat
+
+    var overrideHeight: CGFloat?
     
-    /// the shadow color of the view.
-    public var shadowColor: Color
+    var minimizedBottomMargin: CGFloat
+
+    var lateralMargin: CGFloat
     
-    /// the shadow radius of the view.
-    public var shadowRadius: CGFloat
+    var animation: Animation
+    
+
 }
 
 
