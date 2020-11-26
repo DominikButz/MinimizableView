@@ -144,14 +144,12 @@ public struct MiniSettings {
     Initializer
      - Parameter minimizedHeight:  height of the view in minimized state.
      - Parameter overrideHeight: The height  of the miniView in expanded state.If you prefer to set a custom height, you can set this value. Default value is nil, which means it will be set automatically to fill the available vertical space.
-     - Parameter minimizedBottomMargin: The vertical offset from the bottom edge in minimized state. e.g. useful if the mini view shall sit on a tab view.
      - Parameter lateralMargin: leading and trailing margin of the view.
      - Parameter animation: for exansion and compression. default value is an interactive spring animation.
     */
-    public init(minimizedHeight: CGFloat = 60, minimizedBottomMargin: CGFloat = 48, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, animation: Animation = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, animation: Animation = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
         self.minimizedHeight = minimizedHeight
         self.overrideHeight = overrideHeight
-        self.minimizedBottomMargin = minimizedBottomMargin
         self.lateralMargin = lateralMargin
         self.animation = animation
  
@@ -160,8 +158,6 @@ public struct MiniSettings {
     var minimizedHeight: CGFloat
 
     var overrideHeight: CGFloat?
-    
-    var minimizedBottomMargin: CGFloat
 
     var lateralMargin: CGFloat
     

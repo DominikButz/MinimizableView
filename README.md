@@ -1,4 +1,4 @@
-# MinimizableView (iOS 13 / iPadOS)
+# MinimizableView (iOS 13+ / iPadOS)
 
 [![Version](https://img.shields.io/cocoapods/v/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
 [![License](https://img.shields.io/cocoapods/l/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
@@ -8,6 +8,10 @@
  MinimizableView is a simple SwiftUI view for iOS and iPadOS that can minimize like the mini-player in the Spotify or Apple Music app. Currently, it seems that SwiftUI does not support custom modals (with different animations / states than sheet, actionSheet, alert, popover etc.), so this simple view can be considered as a workaround.
 It can only be used from iOS 13.0 because SwiftUI is not supported in earlier iOS versions.
 
+**Breaking changes in version 2.0. See details below in the version history**
+
+*Special thanks to Kavsoft ([see here](https://kavsoft.dev/SwiftUI_2.0/Apple_Music/)) - I used parts of their MiniPlayer content in the example. The framework is my own creation though.*
+
 ## Example project
 
 This repo only contains the Swift package, no example code. Please download the example project [here](https://github.com/DominikButz/MinimizableViewExample.git).
@@ -15,17 +19,13 @@ You need to add the MinimizableView package either through cocoapods or the Swif
 
 ## Features
 
-* Create your own content and compact view. The compact view is optional - in case you set it in the initializer, it will appear in the minimized state. 
+* Create your own content, background and compact view. The compact view is optional - in case you set it in the initializer, it will appear in the minimized state. 
 * By changing the setting properties of the MinimizableViewHandler, you can customize the following properties:
 	- minimizedHeight
+    - overrideHeight (in case you want to set a height different from the geometry size height)
 	- lateralMargin
-    - bottomMargin
-	- expandedTopMargin
-	- backgroundColor
-	- cornerRadius
-	- shadowColor
-	- shadowRadius
-	
+    - animation
+
 	Check out the examples for details. 
 
 
@@ -39,7 +39,7 @@ Select your project (not the target) and then select the Swift Packages tab. Cli
 
 Cocoapods:
 
-platform :ios, '13.0'
+platform :ios, '14.0'
 
 target '[project name]' do
  	pod 'MinimizableView'
@@ -73,95 +73,124 @@ To trigger presentation, dismissal, minimization and expansion, you need to call
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
 ```Swift
-	import SwiftUI
-	import MinimizableView
-	import Combine
 
-	struct ContentView: View {
-		
-        @ObservedObject var minimizableViewHandler: MinimizableViewHandler = MinimizableViewHandler(settings: MiniSettings(lateralMargin:10, backgroundColor: Color(.secondarySystemBackground)))
-	    @State var selectedTabIndex: Int = 0
-	    	    
-	    var body: some View {
-	        GeometryReader { proxy in
+struct RootView: View {
 
-	                TabView(selection: self.$selectedTabIndex) {
-	                    
-	                    Button(action: {
-	                        
-	                        self.minimizableViewHandler.present()
-	                        
-	                    }) { TranslucentTextButtonView(title: "Launch Minimizable View", foregroundColor: .green, backgroundColor: .green)}
-	                        .tabItem {
-	                            Image(systemName: "chevron.up.square.fill")
-	                            Text("Main View")
-	                    }.tag(0)
-	                    
-	                    Text("More stuff").tabItem {
-	                        Image(systemName: "dot.square.fill")
-	                        Text("2nd View")
-	                    }.tag(1)
-	                    
-	                    Text("Even more stuff").tabItem {
-	                        Image(systemName: "square.split.2x1.fill")
-	                        Text("3rd View")
-	                    }.tag(2)
-	                    
-	                    
-	                }.minimizableView(content: {ContentExample()}, compactView: {CompactViewExample()}, geometry: proxy).environmentObject(self.minimizableViewHandler)
-                    .verticalDragGesture(translationHeightTriggerValue: 30)), bottomMargin: 50.0, geometry: proxy)
-	               
-		// VerticalDragGesture is a modifier provided in the package. You can use this one or create your own.
-	                            
-	                
-	        }
-	    
-	        //
-	    }
+    @ObservedObject var miniHandler: MinimizableViewHandler = MinimizableViewHandler()
+    @State var selectedTabIndex: Int = 0
+    
+    @Namespace var namespace
+
+    
+    var body: some View {
+        GeometryReader { proxy in
+
+                TabView(selection: self.$selectedTabIndex) {
+                    
+                    Button(action: {
+                        print(proxy.safeAreaInsets.bottom)
+                        self.miniHandler.present()
+                        
+                    }) { TranslucentTextButtonView(title: "Launch Minimizable View", foregroundColor: .green, backgroundColor: .green)}.disabled(self.miniHandler.isPresented)
+                        
+                        .tabItem {
+                            Image(systemName: "chevron.up.square.fill")
+                            Text("Main View")
+                    }.tag(0)
+                    
+                    Text("More stuff").tabItem {
+                        Image(systemName: "dot.square.fill")
+                        Text("2nd View")
+                    }.tag(1)
+                    
+                    ListView(availableWidth: proxy.size.width)
+                        .tabItem {
+                        Image(systemName: "square.split.2x1.fill")
+                        Text("List View")
+                    }.tag(2)
+                    
+                    
+                }.background(Color(.secondarySystemFill))
+                .statusBar(hidden: self.miniHandler.isPresented && self.miniHandler.isMinimized == false)
+                // if you want a separate compactView, replace EmptyView() by some custom view. It will appear above the top part of your contentView, so make sure the compact view has a background colour. 
+                .minimizableView(content: {ContentExample(animationNamespaceId: self.namespace)}, compactView: {EmptyView()}, backgroundView: {
+                    VStack(spacing: 0){
+                        
+                        BlurView(style: .systemChromeMaterial)
+                        if self.miniHandler.isMinimized {
+                            Divider()
+                        }
+                    }.cornerRadius(self.miniHandler.isMinimized ? 0 : 20)
+                    .onTapGesture(perform: {
+                        if self.miniHandler.isMinimized {
+                        withAnimation(.spring()){self.miniHandler.isMinimized = false}
+                        }
+                    })
+                }, dragOnChanged: { (value) in
+                    self.dragOnChanged(value: value)
+                }, dragOnEnded: { (value) in
+                    self.dragOnEnded(value: value)
+                }, geometry: proxy, settings: MiniSettings(minimizedHeight: 80))
+                .environmentObject(self.miniHandler)
+     
+        }
+    
+        //
+    }
+    
+    
+    func dragOnChanged(value: DragGesture.Value) {
+        if self.miniHandler.isMinimized == false  { // expanded state
+            if value.translation.height > 0 {
+                self.miniHandler.draggedOffsetY = value.translation.height
+
+            }
+        } else {// minimized state
+            
+            if value.translation.height < 0 {
+                self.miniHandler.draggedOffsetY = value.translation.height
+
+            }
+        }
+    }
+    
+    func dragOnEnded(value: DragGesture.Value) {
+        if self.miniHandler.isMinimized == false  {
+            if value.translation.height > 60 {
+                  self.miniHandler.minimize()
+           
+            }
+            
+        } else {
+            if value.translation.height < -60 {
+                  self.miniHandler.expand()
+    
+              }
+            
+        }
+       withAnimation(.spring()) {
+            self.miniHandler.draggedOffsetY = 0
+       }
+
+    }
 }
+
    
 
 ```
 
-
-### Code Example: TopDelimiterAreaView in your MinimizableView content
-
-If you want a gray capsule shaped delimiter view at the top of your content (which can act as button to change the expansion state ), you can add a TopDelimiterAreaView. Attach a tap gesture recognizer to toggle the expansion state. 
-
-```Swift
-		VStack {
-    			TopDelimiterAreaView(areaWidth: proxy.size.width).onTapGesture {
-                  self.minimizableViewHandler.toggleExpansionState()
-                   // other views    
-            }
-                    
-                
-   }
-```
-### Code Example: VerticalDragGesture Recognizer
-
-Add a VerticalDragGesture as modifier to your compact view. If the user swipes upwards, the minimizableView will expand. You can do the same in your main content that is embedded in the minimizableView to allow triggering minimization when the user swipes down.
-
-```Swift
-		struct CompactViewExample: View {
-	    
-	    @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
-	    
-	    var body: some View {
-	        GeometryReader { proxy in
-	             HStack {
-	                Text("Compact View")
-	             }.frame(width: proxy.size.width, height: proxy.size.height).onTapGesture {
-	                    self.minimizableViewHandler.expand()
-	             }.background(Color(.secondarySystemBackground)).verticalDragGesture(translationHeightTriggerValue: 40))
-	        }
-	    }
-	}
-```
-
 ## Change log
 
-#### [Version1.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.2.1)
+#### [Version 2.0.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.0.1)
+Moved minimizedBottomMargin to the miniView initializer. This is useful e.g. in case of a changing distance to the bottom edge according to the screen orientation. 
+
+#### [Version 2.0](https://github.com/DominikButz/MinimizableView/releases/tag/2.0)
+Breaking Changes. the following parameters need to be set in the initialiser: 
+- backgroundView
+- onDragChanged and onDragEnded  
+- settings (optional)
+
+#### [Version 1.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/1.2.1)
 Bug fix: when in minimized state, the mini view will disappear if the keyboard shows (instead of floating above the keyboard).
 
 #### [Version 1.2](https://github.com/DominikButz/MinimizableView/releases/tag/1.2)
