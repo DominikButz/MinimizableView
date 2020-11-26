@@ -65,7 +65,7 @@ Check out the following example. This repo only contains the Swift package, no e
 
 ### Code example: Content View (your main view)
 
-Make sure to add an overlay view modifier to the view over which the Minimizable View shall appear. Alternatively, you can add it as the last view in a ZStack. 
+Simply attach the .minimizableView modifier to your main view, e.g. a TabView. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
  If you don't want a compact view, just pass in an EmptyView. The code in the body of MinimizableView checks if compactView is an EmptyView and then does not display it.  if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. Use the minimizableViewHandler as EnvironmentObject in your content view - e.g. to remove and insert certain subviews once the minimized property changes. 
