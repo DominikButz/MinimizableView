@@ -175,10 +175,13 @@ internal class KeyboardNotifier: ObservableObject {
     var keyboardWillShow: (()->Void)?
     var keyboardWillHide:(()->Void)?
     
+    @Published var keyboardIsShowing: Bool = false
+    
     init(keyboardWillShow:  (()->Void)?, keyboardWillHide: (()->Void)?) {
         self.notificationCentre =  NotificationCenter.default
         notificationCentre.addObserver(self, selector: #selector(keyBoardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         notificationCentre.addObserver(self, selector: #selector(keyBoardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    //    notificationCentre.addObserver(self, selector: #(keyBoardDid), name: <#T##NSNotification.Name?#>, object: <#T##Any?#>)
         self.keyboardWillShow = keyboardWillShow
         self.keyboardWillHide = keyboardWillHide
     }
@@ -189,9 +192,11 @@ internal class KeyboardNotifier: ObservableObject {
 
     @objc func keyBoardWillShow(notification: Notification) {
         self.keyboardWillShow?()
+        self.keyboardIsShowing = true
     }
 
     @objc func keyBoardWillHide(notification: Notification) {
         self.keyboardWillHide?()
+        self.keyboardIsShowing = false
     }
 }

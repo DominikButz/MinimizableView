@@ -8,8 +8,6 @@
 
 import SwiftUI
 import Combine
-
-
 /**
 MinimizableView.
 */
@@ -36,9 +34,9 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             if self.minimizableViewHandler.isMinimized {
                 return self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY / 2: 0
             } else {
-                // in expanded state, only return offset > 0 if dragging down
+       // expanded
                 return self.minimizableViewHandler.draggedOffsetY
-                // return self.minimizableViewHandler.draggedOffset.height > 0 ? self.minimizableViewHandler.draggedOffset.height  : 0
+
             }
            
          }
@@ -50,8 +48,8 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
         if self.minimizableViewHandler.isMinimized {
             
             let draggedOffset: CGFloat = self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY * (-1) : 0
-            let height = self.minimizableViewHandler.isVisible ? self.settings.minimizedHeight + draggedOffset : 0
-            return height
+            return self.settings.minimizedHeight + draggedOffset
+
          } else {
             return self.settings.overrideHeight
             //return geometry.size.height - self.minimizableViewHandler.settings.expandedTopMargin
@@ -62,20 +60,6 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
         return self.minimizableViewHandler.isMinimized ? -self.minimizedBottomMargin - geometry.safeAreaInsets.bottom  - self.minimizableViewHandler.draggedOffsetY / 2 : 0
     }
     
-//    var positionY: CGFloat {
-//        let totalHeight = maxSize.height
-//
-//        if self.minimizableViewHandler.isMinimized {
-//
-//            return totalHeight - self.minimizableViewHandler.settings.expandedTopMargin - self.minimizableViewHandler.settings.bottomMargin - self.minimizableViewHandler.settings.minimizedHeight
-//
-//        } else {
-//            return (totalHeight / 2) - self.minimizableViewHandler.settings.expandedTopMargin
-//
-//        }
-//    }
-
-
     /**
     MinimizableView Initializer.
 
@@ -117,9 +101,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             }
             .frame(width: geometry.size.width - self.settings.lateralMargin * 2 ,
                   height: self.frameHeight)
-          //  .clipShape(RoundedRectangle(cornerRadius: self.minimizableViewHandler.settings.cornerRadius))
             .background(self.backgroundView)
-         // .position(CGPoint(x: maxSize.width / 2, y: self.positionY))
             .offset(y: self.offsetY)
             .offset(y: self.minimizedOffsetY)
             .animation(self.settings.animation)
@@ -130,7 +112,8 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
 
 struct MinimizableViewModifier<MainContent: View, CompactContent:View, BackgroundView: View>: ViewModifier {
      @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
-        
+    @ObservedObject var keyboardNotifier = KeyboardNotifier(keyboardWillShow: nil, keyboardWillHide: nil)
+    
       var contentView:  ()-> MainContent
       var compactView: ()-> CompactContent
       var backgroundView: ()->BackgroundView
@@ -147,7 +130,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
             content
  
             MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
-                .gesture(DragGesture().onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler)
+                .gesture(DragGesture().onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
             
         }
         .edgesIgnoringSafeArea(.bottom)

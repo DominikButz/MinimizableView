@@ -181,6 +181,9 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.0.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.0.2)
+Bug fix: When in minimized state and the keyboard appears, the miniView will now correctly disappear and reappear after the keyboard is dismissed.
+
 #### [Version 2.0.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.0.1)
 Moved minimizedBottomMargin to the miniView initializer. This is useful e.g. in case of a changing distance to the bottom edge according to the screen orientation. 
 
