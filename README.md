@@ -24,6 +24,7 @@ You need to add the MinimizableView package either through cocoapods or the Swif
 	- minimizedHeight
     - overrideHeight (in case you want to set a height different from the geometry size height)
 	- lateralMargin
+    - edgesIgnoringSafeAreas
     - animation
 
 	Check out the examples for details. 
@@ -180,6 +181,9 @@ struct RootView: View {
 ```
 
 ## Change log
+
+#### [Version 2.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.1)
+Added edgesIgnoringSafeArea to settings. Default value is [.bottom, .top]. Make sure to add top padding to your content if required. 
 
 #### [Version 2.0.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.0.2)
 Bug fix: When in minimized state and the keyboard appears, the miniView will now correctly disappear and reappear after the keyboard is dismissed.

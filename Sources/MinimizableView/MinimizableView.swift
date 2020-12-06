@@ -133,7 +133,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
                 .gesture(DragGesture().onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
             
         }
-        .edgesIgnoringSafeArea(.bottom)
+        .edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)
     }
 }
 

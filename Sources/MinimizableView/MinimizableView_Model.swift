@@ -145,12 +145,14 @@ public struct MiniSettings {
      - Parameter minimizedHeight:  height of the view in minimized state.
      - Parameter overrideHeight: The height  of the miniView in expanded state.If you prefer to set a custom height, you can set this value. Default value is nil, which means it will be set automatically to fill the available vertical space.
      - Parameter lateralMargin: leading and trailing margin of the view.
+     - Parameter edgesIgnoringSafeArea: Array of Edge.Sets. Default is bottom and top - this means that if you don't override the height of the mini view, it will cover the top and bottom safe areas, if they exist for the device.
      - Parameter animation: for exansion and compression. default value is an interactive spring animation.
     */
-    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, animation: Animation = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
+    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, edgesIgnoringSafeArea: Edge.Set = [.bottom, .top],  animation: Animation = Animation.interactiveSpring(response: 0.5, dampingFraction: 0.95, blendDuration: 0.95)) {
         self.minimizedHeight = minimizedHeight
         self.overrideHeight = overrideHeight
         self.lateralMargin = lateralMargin
+        self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.animation = animation
  
     }
@@ -160,6 +162,8 @@ public struct MiniSettings {
     var overrideHeight: CGFloat?
 
     var lateralMargin: CGFloat
+    
+    var edgesIgnoringSafeArea: Edge.Set
     
     var animation: Animation
     
