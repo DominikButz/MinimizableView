@@ -50,7 +50,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func present() {
         
         if self.isPresented == false {
-            self.isPresented = true
+            withAnimation {
+                self.isPresented = true
+            }
         }
   
     }
@@ -61,9 +63,9 @@ public class MinimizableViewHandler: ObservableObject {
     public func dismiss() {
         
         if self.isPresented == true {
-
-            self.isPresented = false
-            
+            withAnimation {
+                self.isPresented = false
+            }
             if self.isMinimized == true {
                 self.isMinimized = false
             }

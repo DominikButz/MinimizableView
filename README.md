@@ -182,6 +182,9 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.1.1)
+iOS 15 update: fixed a bug that could trigger an infinite loop while dragging the mini view upwards (in minimized state).
+
 #### [Version 2.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.1)
 Added edgesIgnoringSafeArea to settings. Default value is [.bottom, .top]. Make sure to add top padding to your content if required. 
 

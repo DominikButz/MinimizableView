@@ -130,7 +130,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
             content
  
             MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
-                .gesture(DragGesture().onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
+                .gesture(DragGesture(coordinateSpace: .global).onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
             
         }
         .edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)
