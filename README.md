@@ -123,7 +123,7 @@ struct RootView: View {
                     }.cornerRadius(self.miniHandler.isMinimized ? 0 : 20)
                     .onTapGesture(perform: {
                         if self.miniHandler.isMinimized {
-                            self.miniHandler.expand(
+                            self.miniHandler.expand()
                                 ////alternatively, override the default animation. self.miniHandler.expand(animation: Animation)
                         }
                     })
