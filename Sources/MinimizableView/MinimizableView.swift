@@ -104,8 +104,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             .background(self.backgroundView)
             .offset(y: self.offsetY)
             .offset(y: self.minimizedOffsetY)
-            .animation(self.settings.animation)
-        
+    
     }
     
 }

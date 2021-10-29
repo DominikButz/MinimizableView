@@ -25,7 +25,6 @@ You need to add the MinimizableView package either through cocoapods or the Swif
     - overrideHeight (in case you want to set a height different from the geometry size height)
 	- lateralMargin
     - edgesIgnoringSafeAreas
-    - animation
 
 	Check out the examples for details. 
 
@@ -124,7 +123,8 @@ struct RootView: View {
                     }.cornerRadius(self.miniHandler.isMinimized ? 0 : 20)
                     .onTapGesture(perform: {
                         if self.miniHandler.isMinimized {
-                        withAnimation(.spring()){self.miniHandler.isMinimized = false}
+                            self.miniHandler.expand(
+                                ////alternatively, override the default animation. self.miniHandler.expand(animation: Animation)
                         }
                     })
                 }, dragOnChanged: { (value) in
@@ -181,6 +181,9 @@ struct RootView: View {
 ```
 
 ## Change log
+
+#### [Version 2.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.2)
+iOS 15 update: Removed animation from settings because the animation modifier on the miniView can impact the content view's subviews' animations and lead to weird behavior. Instead the miniView handler functions present(), expand(),  minimize() and toggleExpansionState() have now (an) animation parameter(s) that can be overriden (default is .spring()).
 
 #### [Version 2.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.1.1)
 iOS 15 update: fixed a bug that could trigger an infinite loop while dragging the mini view upwards (in minimized state).
