@@ -26,7 +26,7 @@ You need to add the MinimizableView package either through cocoapods or the Swif
 	- lateralMargin
     - edgesIgnoringSafeAreas
 
-	Check out the examples for details. 
+Check out the examples for details. 
 
 
 ## Installation
@@ -68,7 +68,7 @@ Check out the following example. This repo only contains the Swift package, no e
 Simply attach the .minimizableView modifier to your main view, e.g. a TabView. 
 To trigger presentation, dismissal, minimization and expansion, you need to call the respective functions of the minimizableViewHandler: present(), dismiss(), minimize() and expand(). It is advisable to call toggleExpansionState() on the minimizableViewHandler whenever you use a tapGesture to toggle the expansion state. 
 
- If you don't want a compact view, just pass in an EmptyView. The code in the body of MinimizableView checks if compactView is an EmptyView and then does not display it.  if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state. Use the minimizableViewHandler as EnvironmentObject in your content view - e.g. to remove and insert certain subviews once the minimized property changes. 
+ If you don't want a separate compact view, just pass an EmptyView into the compactView closure of the initialiser. The code in the body of MinimizableView checks if compactView is an EmptyView and in that case does not display it.  if there is no compact view, the top of your content will be shown at the bottom of the screen in minimized state.  Use the minimizableViewHandler as EnvironmentObject in your content view - e.g. to remove and insert certain subviews (or to change their opacity) once the minimized property changes (see the example below).
 
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
@@ -81,7 +81,6 @@ struct RootView: View {
     
     @Namespace var namespace
 
-    
     var body: some View {
         GeometryReader { proxy in
 
@@ -112,21 +111,11 @@ struct RootView: View {
                     
                 }.background(Color(.secondarySystemFill))
                 .statusBar(hidden: self.miniHandler.isPresented && self.miniHandler.isMinimized == false)
-                // if you want a separate compactView, replace EmptyView() by some custom view. It will appear above the top part of your contentView, so make sure the compact view has a background colour. 
-                .minimizableView(content: {ContentExample(animationNamespaceId: self.namespace)}, compactView: {EmptyView()}, backgroundView: {
-                    VStack(spacing: 0){
-                        
-                        BlurView(style: .systemChromeMaterial)
-                        if self.miniHandler.isMinimized {
-                            Divider()
-                        }
-                    }.cornerRadius(self.miniHandler.isMinimized ? 0 : 20)
-                    .onTapGesture(perform: {
-                        if self.miniHandler.isMinimized {
-                            self.miniHandler.expand()
-                                ////alternatively, override the default animation. self.miniHandler.expand(animation: Animation)
-                        }
-                    })
+                .minimizableView(content: {ContentExample(animationNamespaceId: self.namespace)},
+                  compactView: {
+                    EmptyView()  // replace EmptyView() by CompactViewExample() to see the a different approach for the compact view
+                }, backgroundView: {
+                    self.backgroundView()
                 }, dragOnChanged: { (value) in
                     self.dragOnChanged(value: value)
                 }, dragOnEnded: { (value) in
@@ -140,34 +129,41 @@ struct RootView: View {
     }
     
     
+    func backgroundView() -> some View {
+        VStack(spacing: 0){
+            BlurView(style: .systemChromeMaterial)
+            if self.miniHandler.isMinimized {
+                Divider()
+            }
+        }.cornerRadius(self.miniHandler.isMinimized ? 0 : 20)
+        .onTapGesture(perform: {
+            if self.miniHandler.isMinimized {
+                self.miniHandler.expand()
+                //alternatively, override the default animation. self.miniHandler.expand(animation: Animation)
+            }
+        })
+    }
+    
+    
     func dragOnChanged(value: DragGesture.Value) {
-        if self.miniHandler.isMinimized == false  { // expanded state
-            if value.translation.height > 0 {
-                self.miniHandler.draggedOffsetY = value.translation.height
-
-            }
-        } else {// minimized state
+        
+        if self.miniHandler.isMinimized == false && value.translation.height > 0   { // expanded state
             
-            if value.translation.height < 0 {
-                self.miniHandler.draggedOffsetY = value.translation.height
-
-            }
+            self.miniHandler.draggedOffsetY = value.translation.height / 2 // divide by 2 for more "inertia"
+            
+        } else if self.miniHandler.isMinimized && value.translation.height < 0   {// minimized state
+            self.miniHandler.draggedOffsetY = value.translation.height / 2 // divide by 2 for more "inertia"
+            
         }
     }
     
     func dragOnEnded(value: DragGesture.Value) {
-        if self.miniHandler.isMinimized == false  {
-            if value.translation.height > 60 {
-                  self.miniHandler.minimize()
-           
-            }
-            
-        } else {
-            if value.translation.height < -60 {
+        
+        if self.miniHandler.isMinimized == false && value.translation.height > 60  {
+            self.miniHandler.minimize()
+
+        } else if self.miniHandler.isMinimized &&  value.translation.height < -60 {
                   self.miniHandler.expand()
-    
-              }
-            
         }
        withAnimation(.spring()) {
             self.miniHandler.draggedOffsetY = 0
@@ -176,14 +172,16 @@ struct RootView: View {
     }
 }
 
-   
 
 ```
 
 ## Change log
 
+#### [Version 2.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.2.1)
+Content view and compact view are now clipped to prevent subviews in the content view from still being visible despite being minimized. This removes the necessity to apply the clipped modifier on your custom content and compact views. Since the subviews of your content view disappear properly now once the mini view compresses, it is not necessary any more to conditionally show and remove subviews of your content view according to minimized and expanded states (exceptions:  subviews with matched geometry effect and removing / showing view elements on the top bar of your content view if you don't use a separate compact view).
+
 #### [Version 2.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.2)
-iOS 15 update: Removed animation from settings because the animation modifier on the miniView can impact the content view's subviews' animations and lead to weird behavior. Instead the miniView handler functions present(), expand(),  minimize() and toggleExpansionState() have now (an) animation parameter(s) that can be overriden (default is .spring()).
+iOS 15 update: Removed animation from settings because the animation modifier on the miniView can impact the content view's subviews' animations and lead to weird behavior. Instead the miniView handler functions present(), expand(),  minimize() and toggleExpansionState() have now (an) animation parameter(s) that can be overridden (default is .spring()).
 
 #### [Version 2.1.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.1.1)
 iOS 15 update: fixed a bug that could trigger an infinite loop while dragging the mini view upwards (in minimized state).

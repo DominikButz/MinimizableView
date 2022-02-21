@@ -91,10 +91,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
   
             ZStack(alignment: .top) {
                 if self.minimizableViewHandler.isPresented == true {
-                    self.contentView
+                    self.contentView.clipped()
                   
                     if self.minimizableViewHandler.isMinimized && (self.compactView is EmptyView) == false {
-                        self.compactView
+                        self.compactView.clipped()
                        
                     }
                }
@@ -110,7 +110,7 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
 }
 
 struct MinimizableViewModifier<MainContent: View, CompactContent:View, BackgroundView: View>: ViewModifier {
-     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
+    @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
     @ObservedObject var keyboardNotifier = KeyboardNotifier(keyboardWillShow: nil, keyboardWillHide: nil)
     
       var contentView:  ()-> MainContent
