@@ -6,7 +6,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'MinimizableView'
-  s.version          = '2.2'
+  s.version          = '2.2.1'
   s.summary          = 'SwiftUI view that minimises to the bottom of the screen similar to the mini-player in Apple Music or Spotify.'
   s.swift_version = '5.1'
 
