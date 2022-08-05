@@ -78,7 +78,7 @@ struct RootView: View {
 
     @ObservedObject var miniHandler: MinimizableViewHandler = MinimizableViewHandler()
     @State var selectedTabIndex: Int = 0
-    
+    @GestureState var dragOffset = CGSize.zero
     @Namespace var namespace
 
     var body: some View {
@@ -115,10 +115,16 @@ struct RootView: View {
                   compactView: {
                     EmptyView()  // replace EmptyView() by CompactViewExample() to see the a different approach for the compact view
                 }, backgroundView: {
-                    self.backgroundView()
+                    self.backgroundView()},
+                    dragOffset: $dragOffset,
+                    dragUpdating: { (value, state, transaction) in
+                        state = value.translation
+                        self.dragUpdated(value: value)
+   
                 }, dragOnChanged: { (value) in
-                    self.dragOnChanged(value: value)
-                }, dragOnEnded: { (value) in
+                        
+                },
+                    dragOnEnded: { (value) in
                     self.dragOnEnded(value: value)
                 }, geometry: proxy, settings: MiniSettings(minimizedHeight: 80))
                 .environmentObject(self.miniHandler)
@@ -145,14 +151,14 @@ struct RootView: View {
     }
     
     
-    func dragOnChanged(value: DragGesture.Value) {
+    func dragUpdated(value: DragGesture.Value) {
         
         if self.miniHandler.isMinimized == false && value.translation.height > 0   { // expanded state
             
-            self.miniHandler.draggedOffsetY = value.translation.height / 2 // divide by 2 for more "inertia"
+            self.miniHandler.draggedOffsetY = value.translation.height  // divide by a factor > 1 for more "inertia" if needed
             
         } else if self.miniHandler.isMinimized && value.translation.height < 0   {// minimized state
-            self.miniHandler.draggedOffsetY = value.translation.height / 2 // divide by 2 for more "inertia"
+            self.miniHandler.draggedOffsetY = value.translation.height  // divide by a factor > 1 for more "inertia" if needed
             
         }
     }
@@ -176,6 +182,10 @@ struct RootView: View {
 ```
 
 ## Change log
+
+
+#### [Version 2.3](https://github.com/DominikButz/MinimizableView/releases/tag/2.3)
+Breaking change: added dragOffset parameter and dragUpdating closure. It is possible to move the dragOnChange logic to the dragUpdating closure (see updated example code).
 
 #### [Version 2.2.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.2.1)
 Content view and compact view are now clipped to prevent subviews in the content view from still being visible despite being minimized. This removes the necessity to apply the clipped modifier on your custom content and compact views. Since the subviews of your content view disappear properly now once the mini view compresses, it is not necessary any more to conditionally show and remove subviews of your content view according to minimized and expanded states (exceptions:  subviews with matched geometry effect and removing / showing view elements on the top bar of your content view if you don't use a separate compact view).

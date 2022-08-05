@@ -13,14 +13,14 @@ Handler for MinimizableView. Must be attached as Environment Object to Minimizab
 */
 public class MinimizableViewHandler: ObservableObject {
  
-    var keyboardResponder: KeyboardNotifier?
+    var keyboardResponder: MVKeyboardNotifier?
     /**
     Handler Initializer.
       - Parameter settings: See MiniSettings for details. can be nil - if nil, the default values will be set.
     */
     public init() {
 
-        self.keyboardResponder = KeyboardNotifier(keyboardWillShow: {
+        self.keyboardResponder = MVKeyboardNotifier(keyboardWillShow: {
             if self.isMinimized {
                 self.isVisible = false
             }
@@ -173,16 +173,17 @@ public struct MiniSettings {
 
 
 
-internal class KeyboardNotifier: ObservableObject {
+public class MVKeyboardNotifier: ObservableObject {
    
     private var notificationCentre: NotificationCenter
     
     var keyboardWillShow: (()->Void)?
     var keyboardWillHide:(()->Void)?
     
-    @Published var keyboardIsShowing: Bool = false
+    @Published public var keyboardIsShowing: Bool = false
+    @Published public var keyboardHeight: CGFloat = 0
     
-    init(keyboardWillShow:  (()->Void)?, keyboardWillHide: (()->Void)?) {
+    public init(keyboardWillShow:  (()->Void)?, keyboardWillHide: (()->Void)?) {
         self.notificationCentre =  NotificationCenter.default
         notificationCentre.addObserver(self, selector: #selector(keyBoardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         notificationCentre.addObserver(self, selector: #selector(keyBoardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -198,10 +199,15 @@ internal class KeyboardNotifier: ObservableObject {
     @objc func keyBoardWillShow(notification: Notification) {
         self.keyboardWillShow?()
         self.keyboardIsShowing = true
+        if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardRectangle = keyboardFrame.cgRectValue
+            self.keyboardHeight =  keyboardRectangle.height
+        }
     }
 
     @objc func keyBoardWillHide(notification: Notification) {
         self.keyboardWillHide?()
         self.keyboardIsShowing = false
+        self.keyboardHeight = 0
     }
 }

@@ -28,13 +28,14 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
     var offsetY: CGFloat {
          
         if self.minimizableViewHandler.isPresented == false {
-            return UIScreen.main.bounds.height + 30  // safety margin for shadow etc.
+            //return UIScreen.main.bounds.height + 30  // safety margin for shadow etc.
+            return 0
          } else {
              // is presenting
             if self.minimizableViewHandler.isMinimized {
-                return self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY / 2: 0
+                return self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY : 0
             } else {
-       // expanded
+                    // expanded
                 return self.minimizableViewHandler.draggedOffsetY
 
             }
@@ -42,6 +43,20 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
          }
 
      }
+    
+    var positionY: CGFloat {
+        if self.minimizableViewHandler.isPresented {
+            if self.minimizableViewHandler.isMinimized {
+                let dragCorrection = self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY  : 0
+                return UIScreen.main.bounds.height - settings.minimizedHeight / 2  - minimizedBottomMargin - geometry.safeAreaInsets.bottom - dragCorrection / 2
+            } else {
+
+                return UIScreen.main.bounds.height - (settings.overrideHeight ?? UIScreen.main.bounds.height) / 2  
+            }
+        } else {
+            return -geometry.size.height / 2
+        }
+    }
      
     var frameHeight: CGFloat? {
          
@@ -56,10 +71,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
          }
      }
     
-    var minimizedOffsetY: CGFloat {
-        return self.minimizableViewHandler.isMinimized ? -self.minimizedBottomMargin - geometry.safeAreaInsets.bottom  - self.minimizableViewHandler.draggedOffsetY / 2 : 0
-    }
-    
+//    var minimizedOffsetY: CGFloat {
+//        return self.minimizableViewHandler.isMinimized ? -self.minimizedBottomMargin - geometry.safeAreaInsets.bottom  - self.minimizableViewHandler.draggedOffsetY / 2 : 0
+//    }
+//
     /**
     MinimizableView Initializer.
 
@@ -102,8 +117,9 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             .frame(width: geometry.size.width - self.settings.lateralMargin * 2 ,
                   height: self.frameHeight)
             .background(self.backgroundView)
+            .position(x: geometry.size.width / 2, y: self.positionY)
             .offset(y: self.offsetY)
-            .offset(y: self.minimizedOffsetY)
+  
     
     }
     
@@ -111,14 +127,16 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
 
 struct MinimizableViewModifier<MainContent: View, CompactContent:View, BackgroundView: View>: ViewModifier {
     @EnvironmentObject var minimizableViewHandler: MinimizableViewHandler
-    @ObservedObject var keyboardNotifier = KeyboardNotifier(keyboardWillShow: nil, keyboardWillHide: nil)
     
       var contentView:  ()-> MainContent
       var compactView: ()-> CompactContent
       var backgroundView: ()->BackgroundView
-    
+      var dragOffset: GestureState<CGSize>
+      var dragUpdating: (DragGesture.Value, inout CGSize, inout Transaction)->()
       var dragOnChanged: (DragGesture.Value)->()
-     var dragOnEnded: (DragGesture.Value)->()
+      var dragOnEnded: (DragGesture.Value)->()
+
+      
       var geometry: GeometryProxy
        var minimizedBottomMargin: CGFloat
         var settings: MiniSettings
@@ -129,7 +147,11 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
             content
  
             MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
-                .gesture(DragGesture(coordinateSpace: .global).onChanged(self.dragOnChanged).onEnded(self.dragOnEnded)).environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
+                .gesture(DragGesture(minimumDistance: 0,  coordinateSpace: .global)
+                    .onChanged(self.dragOnChanged)
+                    .updating(dragOffset, body:self.dragUpdating)
+                    .onEnded(self.dragOnEnded))
+                .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
             
         }
         .edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)
@@ -147,6 +169,10 @@ public extension View {
      
     - Parameter backgroundView: Pass in a background view. Don't set its frame.
      
+    - Parameter dragOffset: set aninstance variable of type GestureState<CGSize> like so: @GestureState var dragOffset = CGSize.zero. then pass it to this parameter as binding.
+     
+    - Parameter dragUpdating: 
+     
     - Parameter dragOnChanged: Determine what happens when the user vertically drags the miniView.
      
     - Parameter dragOnEnded: Determine what should happen when the user released the miniView after dragging.
@@ -155,8 +181,8 @@ public extension View {
     - Parameter minimizedBottomMargin: The vertical offset from the bottom edge in minimized state. e.g. useful if the mini view shall sit on a tab view.
     - Parameter settings: Minimizable View Settings.
     */
-    func minimizableView<MainContent: View, CompactContent: View, BackgroundView: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: @escaping ()->CompactContent, backgroundView: @escaping ()->BackgroundView, dragOnChanged: @escaping (DragGesture.Value)->(), dragOnEnded: @escaping (DragGesture.Value)->(), geometry: GeometryProxy, minimizedBottomMargin: CGFloat = 48,  settings: MiniSettings = MiniSettings())->some View  {
-        self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, backgroundView: backgroundView, dragOnChanged: dragOnChanged, dragOnEnded: dragOnEnded, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings))
+    func minimizableView<MainContent: View, CompactContent: View, BackgroundView: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: @escaping ()->CompactContent, backgroundView: @escaping ()->BackgroundView, dragOffset:  GestureState<CGSize>, dragUpdating: @escaping (DragGesture.Value, inout CGSize, inout Transaction)->(), dragOnChanged: @escaping (DragGesture.Value)->(),  dragOnEnded: @escaping (DragGesture.Value)->(), geometry: GeometryProxy, minimizedBottomMargin: CGFloat = 48,  settings: MiniSettings = MiniSettings())->some View  {
+        self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, backgroundView: backgroundView, dragOffset: dragOffset , dragUpdating: dragUpdating, dragOnChanged: dragOnChanged,  dragOnEnded: dragOnEnded,  geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings))
     }
     
 }
