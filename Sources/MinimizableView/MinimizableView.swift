@@ -151,6 +151,14 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
                     .onChanged(self.dragOnChanged)
                     .updating(dragOffset, body:self.dragUpdating)
                     .onEnded(self.dragOnEnded))
+                .simultaneousGesture(MagnificationGesture().onEnded({ value in
+                    if self.minimizableViewHandler.draggedOffsetY > 10 || self.minimizableViewHandler.draggedOffsetY < 0 {
+                        self.minimizableViewHandler.minimize()
+                        withAnimation(.spring()) {
+                            self.minimizableViewHandler.draggedOffsetY = 0
+                        }
+                    }
+                }))
                 .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
             
         }
@@ -169,13 +177,13 @@ public extension View {
      
     - Parameter backgroundView: Pass in a background view. Don't set its frame.
      
-    - Parameter dragOffset: set aninstance variable of type GestureState<CGSize> like so: @GestureState var dragOffset = CGSize.zero. then pass it to this parameter as binding.
+    - Parameter dragOffset: set an instance variable of type GestureState<CGSize> like so: @GestureState var dragOffset = CGSize.zero. Then pass it to this parameter as binding.
      
-    - Parameter dragUpdating: 
+    - Parameter dragUpdating: Updates the provided gesture state property as the drag's value changes.
      
     - Parameter dragOnChanged: Determine what happens when the user vertically drags the miniView.
      
-    - Parameter dragOnEnded: Determine what should happen when the user released the miniView after dragging.
+    - Parameter dragOnEnded: Determine what should happen when the user releases the miniView after dragging.
      
     - Parameter geometry: Embed the ZStack, in which the MinimizableView resides, in a geometry reader.  This will allow the MinimizableView to adapt to a changing screen orientation.
     - Parameter minimizedBottomMargin: The vertical offset from the bottom edge in minimized state. e.g. useful if the mini view shall sit on a tab view.

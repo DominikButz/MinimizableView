@@ -122,7 +122,7 @@ struct RootView: View {
                         self.dragUpdated(value: value)
    
                 }, dragOnChanged: { (value) in
-                        
+                        // add some custom logic if needed
                 },
                     dragOnEnded: { (value) in
                     self.dragOnEnded(value: value)
@@ -165,7 +165,7 @@ struct RootView: View {
     
     func dragOnEnded(value: DragGesture.Value) {
         
-        if self.miniHandler.isMinimized == false && value.translation.height > 60  {
+        if self.miniHandler.isMinimized == false && value.translation.height > 90  {
             self.miniHandler.minimize()
 
         } else if self.miniHandler.isMinimized &&  value.translation.height < -60 {
@@ -183,6 +183,8 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.3.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.1)
+Bug fix: If the user drags the mini view up or down and simultaneously does a pan gesture (magnifiying gesture), mini view does not freeze any more but minimizes instead. 
 
 #### [Version 2.3](https://github.com/DominikButz/MinimizableView/releases/tag/2.3)
 Breaking change: added dragOffset parameter and dragUpdating closure. It is possible to move the dragOnChange logic to the dragUpdating closure (see updated example code).
