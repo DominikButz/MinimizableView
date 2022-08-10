@@ -183,6 +183,9 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.3.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.2)
+Added minimumDragDistance to settings. If your content view contains a List, make sure to set this value > 0 (usually between 10 and 30 is a suitable value) - this will make sure the List is scrollable.
+
 #### [Version 2.3.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.1)
 Bug fix: If the user drags the mini view up or down and simultaneously does a pan gesture (magnifiying gesture), mini view does not freeze any more but minimizes instead. 
 

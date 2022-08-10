@@ -120,7 +120,6 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             .position(x: geometry.size.width / 2, y: self.positionY)
             .offset(y: self.offsetY)
   
-    
     }
     
 }
@@ -138,8 +137,8 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
 
       
       var geometry: GeometryProxy
-       var minimizedBottomMargin: CGFloat
-        var settings: MiniSettings
+      var minimizedBottomMargin: CGFloat
+      var settings: MiniSettings
     
     func body(content: Content) -> some View {
         ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
@@ -147,7 +146,8 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
             content
  
             MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
-                .gesture(DragGesture(minimumDistance: 0,  coordinateSpace: .global)
+                .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
+                .gesture(DragGesture(minimumDistance: settings.minimumDragDistance,  coordinateSpace: .global)
                     .onChanged(self.dragOnChanged)
                     .updating(dragOffset, body:self.dragUpdating)
                     .onEnded(self.dragOnEnded))
@@ -159,7 +159,7 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
                         }
                     }
                 }))
-                .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
+             
             
         }
         .edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)

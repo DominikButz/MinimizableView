@@ -149,12 +149,14 @@ public struct MiniSettings {
      - Parameter minimizedHeight:  height of the view in minimized state.
      - Parameter overrideHeight: The height  of the miniView in expanded state.If you prefer to set a custom height, you can set this value. Default value is nil, which means it will be set automatically to fill the available vertical space.
      - Parameter lateralMargin: leading and trailing margin of the view.
+     - Parameter minimumDragDistance:minimum distance required to drag before the gesture succeeds. Default value is 0. If your content view contains a List, make sure to set this value > 0 (usually between 10 and 30 is a suitable value) - this will make sure the List is scrollable.
      - Parameter edgesIgnoringSafeArea: Array of Edge.Sets. Default is bottom and top - this means that if you don't override the height of the mini view, it will cover the top and bottom safe areas, if they exist for the device.
     */
-    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, edgesIgnoringSafeArea: Edge.Set = [.bottom, .top]) {
+    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, minimumDragDistance: CGFloat = 0, edgesIgnoringSafeArea: Edge.Set = [.bottom, .top]) {
         self.minimizedHeight = minimizedHeight
         self.overrideHeight = overrideHeight
         self.lateralMargin = lateralMargin
+        self.minimumDragDistance = minimumDragDistance
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
 
  
@@ -165,6 +167,8 @@ public struct MiniSettings {
     var overrideHeight: CGFloat?
 
     var lateralMargin: CGFloat
+    
+    var minimumDragDistance: CGFloat
     
     var edgesIgnoringSafeArea: Edge.Set
     
