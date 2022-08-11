@@ -59,9 +59,7 @@ import MinimizableView
 
 Check out the following example. This repo only contains the Swift package, no example code. Please download the example project [here](https://github.com/DominikButz/MinimizableViewExample.git).
 
-
-![MinimizableView example](gitResources/example01.gif) 
-
+<img src="gitResources/example01.gif" alt="drawing" width="200"/>
 
 ### Code example: Content View (your main view)
 
