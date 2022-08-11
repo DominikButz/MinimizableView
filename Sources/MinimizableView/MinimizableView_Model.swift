@@ -60,10 +60,10 @@ public class MinimizableViewHandler: ObservableObject {
     /**
     Call this function to dismiss the minimizable view instead of setting isPresented to false directly.
     */
-    public func dismiss() {
+    public func dismiss(animation: Animation = Animation.default) {
         
         if self.isPresented == true {
-            withAnimation {
+            withAnimation(animation) {
                 self.isPresented = false
             }
             if self.isMinimized == true {

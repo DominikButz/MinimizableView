@@ -106,7 +106,9 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
   
             ZStack(alignment: .top) {
                 if self.minimizableViewHandler.isPresented == true {
-                    self.contentView.clipped()
+                    self.contentView
+                        .clipped()
+                        .background(self.backgroundView)
                   
                     if self.minimizableViewHandler.isMinimized && (self.compactView is EmptyView) == false {
                         self.compactView.clipped()
@@ -116,9 +118,10 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
             }
             .frame(width: geometry.size.width - self.settings.lateralMargin * 2 ,
                   height: self.frameHeight)
-            .background(self.backgroundView)
             .position(x: geometry.size.width / 2, y: self.positionY)
             .offset(y: self.offsetY)
+          
+     
   
     }
     

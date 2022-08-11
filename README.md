@@ -183,6 +183,9 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.3.3](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.3)
+Fixes presentation and dismiss transition bug that would move the background out of the view separately from the content.
+
 #### [Version 2.3.2](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.2)
 Added minimumDragDistance to settings. If your content view contains a List, make sure to set this value > 0 (usually between 10 and 30 is a suitable value) - this will make sure the List is scrollable.
 
