@@ -27,11 +27,6 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
     
     var offsetY: CGFloat {
          
-        if self.minimizableViewHandler.isPresented == false {
-            //return UIScreen.main.bounds.height + 30  // safety margin for shadow etc.
-            return 0
-         } else {
-             // is presenting
             if self.minimizableViewHandler.isMinimized {
                 return self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY : 0
             } else {
@@ -39,23 +34,20 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
                 return self.minimizableViewHandler.draggedOffsetY
 
             }
-           
-         }
+
 
      }
     
     var positionY: CGFloat {
-        if self.minimizableViewHandler.isPresented {
+
             if self.minimizableViewHandler.isMinimized {
                 let dragCorrection = self.minimizableViewHandler.draggedOffsetY < 0 ? self.minimizableViewHandler.draggedOffsetY  : 0
-                return UIScreen.main.bounds.height - settings.minimizedHeight / 2  - minimizedBottomMargin - geometry.safeAreaInsets.bottom - dragCorrection / 2
+                return geometry.size.height - settings.minimizedHeight / 2 - geometry.safeAreaInsets.bottom - minimizedBottomMargin - dragCorrection / 2
             } else {
-
-                return UIScreen.main.bounds.height - (settings.overrideHeight ?? UIScreen.main.bounds.height) / 2  
+              return geometry.size.height - (settings.overrideHeight ?? geometry.size.height) / 2
+            
             }
-        } else {
-            return -geometry.size.height / 2
-        }
+
     }
      
     var frameHeight: CGFloat? {
@@ -67,14 +59,11 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
 
          } else {
             return self.settings.overrideHeight
-            //return geometry.size.height - self.minimizableViewHandler.settings.expandedTopMargin
+      
          }
      }
     
-//    var minimizedOffsetY: CGFloat {
-//        return self.minimizableViewHandler.isMinimized ? -self.minimizedBottomMargin - geometry.safeAreaInsets.bottom  - self.minimizableViewHandler.draggedOffsetY / 2 : 0
-//    }
-//
+
     /**
     MinimizableView Initializer.
 
@@ -96,7 +85,8 @@ public struct MinimizableView<MainContent: View, CompactContent: View, Backgroun
         self.geometry = geometry
         self.minimizedBottomMargin = minimizedBottomMargin
         self.settings = settings
-
+//        print("geo height: \(geometry.size.height)")
+//        print("screen height: \(UIScreen.main.bounds.height)")
     }
     
     /**
@@ -138,34 +128,37 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
       var dragOnChanged: (DragGesture.Value)->()
       var dragOnEnded: (DragGesture.Value)->()
 
-      
-      var geometry: GeometryProxy
       var minimizedBottomMargin: CGFloat
       var settings: MiniSettings
     
     func body(content: Content) -> some View {
-        ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
-       
-            content
- 
-            MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
-                .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
-                .gesture(DragGesture(minimumDistance: settings.minimumDragDistance,  coordinateSpace: .global)
-                    .onChanged(self.dragOnChanged)
-                    .updating(dragOffset, body:self.dragUpdating)
-                    .onEnded(self.dragOnEnded))
-                .simultaneousGesture(MagnificationGesture().onEnded({ value in
-                    if self.minimizableViewHandler.draggedOffsetY > 10 || self.minimizableViewHandler.draggedOffsetY < 0 {
-                        self.minimizableViewHandler.minimize()
-                        withAnimation(.spring()) {
-                            self.minimizableViewHandler.draggedOffsetY = 0
-                        }
-                    }
-                }))
-             
-            
-        }
-        .edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)
+        GeometryReader { proxy in
+            ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
+                
+                content.zIndex(0)
+                
+                if self.minimizableViewHandler.isPresented {
+                    MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: proxy, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
+                        .environmentObject(self.minimizableViewHandler).opacity(self.minimizableViewHandler.isVisible ? 1 : 0)
+                        .gesture(DragGesture(minimumDistance: settings.minimumDragDistance,  coordinateSpace: .global)
+                            .onChanged(self.dragOnChanged)
+                            .updating(dragOffset, body:self.dragUpdating)
+                            .onEnded(self.dragOnEnded))
+                        .simultaneousGesture(MagnificationGesture().onEnded({ value in
+                            if self.minimizableViewHandler.draggedOffsetY > 10 || self.minimizableViewHandler.draggedOffsetY < 0 {
+                                self.minimizableViewHandler.minimize()
+                                withAnimation(.spring()) {
+                                    self.minimizableViewHandler.draggedOffsetY = 0
+                                }
+                            }
+                        }))
+                        .zIndex(1)
+                        .transition(AnyTransition.move(edge: .bottom))
+                }
+                
+            }
+           
+        }.edgesIgnoringSafeArea(settings.edgesIgnoringSafeArea)
     }
 }
 
@@ -188,12 +181,11 @@ public extension View {
      
     - Parameter dragOnEnded: Determine what should happen when the user releases the miniView after dragging.
      
-    - Parameter geometry: Embed the ZStack, in which the MinimizableView resides, in a geometry reader.  This will allow the MinimizableView to adapt to a changing screen orientation.
     - Parameter minimizedBottomMargin: The vertical offset from the bottom edge in minimized state. e.g. useful if the mini view shall sit on a tab view.
     - Parameter settings: Minimizable View Settings.
     */
-    func minimizableView<MainContent: View, CompactContent: View, BackgroundView: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: @escaping ()->CompactContent, backgroundView: @escaping ()->BackgroundView, dragOffset:  GestureState<CGSize>, dragUpdating: @escaping (DragGesture.Value, inout CGSize, inout Transaction)->(), dragOnChanged: @escaping (DragGesture.Value)->(),  dragOnEnded: @escaping (DragGesture.Value)->(), geometry: GeometryProxy, minimizedBottomMargin: CGFloat = 48,  settings: MiniSettings = MiniSettings())->some View  {
-        self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, backgroundView: backgroundView, dragOffset: dragOffset , dragUpdating: dragUpdating, dragOnChanged: dragOnChanged,  dragOnEnded: dragOnEnded,  geometry: geometry, minimizedBottomMargin: minimizedBottomMargin, settings: settings))
+    func minimizableView<MainContent: View, CompactContent: View, BackgroundView: View>(@ViewBuilder content: @escaping ()->MainContent, compactView: @escaping ()->CompactContent, backgroundView: @escaping ()->BackgroundView, dragOffset:  GestureState<CGSize>, dragUpdating: @escaping (DragGesture.Value, inout CGSize, inout Transaction)->(), dragOnChanged: @escaping (DragGesture.Value)->(),  dragOnEnded: @escaping (DragGesture.Value)->(), minimizedBottomMargin: CGFloat = 81,  settings: MiniSettings = MiniSettings())->some View  {
+        self.modifier(MinimizableViewModifier(contentView: content, compactView: compactView, backgroundView: backgroundView, dragOffset: dragOffset , dragUpdating: dragUpdating, dragOnChanged: dragOnChanged,  dragOnEnded: dragOnEnded,   minimizedBottomMargin: minimizedBottomMargin, settings: settings))
     }
     
 }

@@ -70,12 +70,15 @@ To trigger presentation, dismissal, minimization and expansion, you need to call
 
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
+NEW
+
 ```Swift
 
 struct RootView: View {
 
     @ObservedObject var miniHandler: MinimizableViewHandler = MinimizableViewHandler()
     @State var selectedTabIndex: Int = 0
+    @State var miniViewBottomMargin: CGFloat = 0
     @GestureState var dragOffset = CGSize.zero
     @Namespace var namespace
 
@@ -94,6 +97,9 @@ struct RootView: View {
                             Image(systemName: "chevron.up.square.fill")
                             Text("Main View")
                     }.tag(0)
+                    .background(TabBarAccessor { tabBar in        // add to update the minimizedBottomMargin dynamically! 
+                            self.miniViewBottomMargin = tabBar.bounds.height - 1
+                        })
                     
                     Text("More stuff").tabItem {
                         Image(systemName: "dot.square.fill")
@@ -124,7 +130,7 @@ struct RootView: View {
                 },
                     dragOnEnded: { (value) in
                     self.dragOnEnded(value: value)
-                }, geometry: proxy, settings: MiniSettings(minimizedHeight: 80))
+                }, minimizedBottomMargin: self.miniViewBottomMargin, settings: MiniSettings(minimizedHeight: 80))
                 .environmentObject(self.miniHandler)
      
         }
@@ -180,6 +186,13 @@ struct RootView: View {
 ```
 
 ## Change log
+
+#### [Version 2.4](https://github.com/DominikButz/MinimizableView/releases/tag/2.4)
+
+* initializer update: removed geometry parameter
+* presentation is now done properly with a move-transition
+* simplified calculation of position and offset of mini view
+* added TabBarAccessor UIViewRepresentable struct. see the example project and updated readme on how to use this. The bottom line is that it helps to update minimizedBottomMargin dynamically in reaction to a change of the tab bar view height. 
 
 #### [Version 2.3.3](https://github.com/DominikButz/MinimizableView/releases/tag/2.3.3)
 Fixes presentation and dismiss transition bug that would move the background out of the view separately from the content.
