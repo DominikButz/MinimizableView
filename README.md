@@ -70,7 +70,7 @@ To trigger presentation, dismissal, minimization and expansion, you need to call
 
 You also need to attach the minimizableViewHandler as environment object to the MinimizableView. 
 
-NEW
+NEW in version 2.4: update the miniViewBottomMargin parameter dynamically as the height of your tab bar changes. This is achieved with the help of TabBarAccessor. The height can change depending on the device and resizing of the app window (e.g. with stage manager on iPad).
 
 ```Swift
 
