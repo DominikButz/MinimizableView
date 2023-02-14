@@ -5,6 +5,7 @@
 //  Created by Dominik Butz on 31/10/2020.
 //
 
+#if os(iOS)
 import Foundation
 import SwiftUI
 
@@ -215,3 +216,4 @@ public class MVKeyboardNotifier: ObservableObject {
         self.keyboardHeight = 0
     }
 }
+#endif
