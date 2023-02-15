@@ -187,6 +187,9 @@ struct RootView: View {
 
 ## Change log
 
+#### [Version 2.4.1](https://github.com/DominikButz/MinimizableView/releases/tag/2.4.1)
+updating readme after merge with pull request crossplatform project friendliness #9. Excluding macOS conflicts through pre-processor conditionals limiting package usage to iOS / iPadOS.
+
 #### [Version 2.4](https://github.com/DominikButz/MinimizableView/releases/tag/2.4)
 
 * initializer update: removed geometry parameter
