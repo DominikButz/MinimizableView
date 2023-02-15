@@ -6,6 +6,7 @@
 //  Copyright © 2019 Duoyun. All rights reserved.
 //Version 0.3.2
 
+#if os(iOS)
 import SwiftUI
 import Combine
 /**
@@ -189,8 +190,4 @@ public extension View {
     }
     
 }
-
-
-
-
-
+#endif

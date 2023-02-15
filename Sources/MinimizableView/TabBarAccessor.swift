@@ -5,6 +5,7 @@
 //  Created by Asperi on StackOverflow https://stackoverflow.com/questions/59969911/programmatically-detect-tab-bar-or-tabview-height-in-swiftui
 //
 
+#if os(iOS)
 import Foundation
 import SwiftUI
 
@@ -40,3 +41,4 @@ public struct TabBarAccessor: UIViewControllerRepresentable {
         }
     }
 }
+#endif
