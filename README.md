@@ -5,8 +5,7 @@
 [![Platform](https://img.shields.io/cocoapods/p/MinimizableView.svg?style=flat)](https://cocoapods.org/pods/MinimizableView)
 
 
- MinimizableView is a simple SwiftUI view for iOS and iPadOS that can minimize like the mini-player in the Spotify or Apple Music app. Currently, it seems that SwiftUI does not support custom modals (with different animations / states than sheet, actionSheet, alert, popover etc.), so this simple view can be considered as a workaround.
-It can only be used from iOS 13.0 because SwiftUI is not supported in earlier iOS versions.
+ MinimizableView is a simple SwiftUI view for iOS and iPadOS that can minimize like the mini-player in the Spotify or Apple Music app. 
 
 **Breaking changes in version 2.0. See details below in the version history**
 
