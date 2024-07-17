@@ -5,7 +5,7 @@
 //  Created by Dominik Butz on 31/10/2020.
 //
 
-#if os(iOS)
+
 import Foundation
 import SwiftUI
 
@@ -13,14 +13,15 @@ import SwiftUI
 Handler for MinimizableView. Must be attached as Environment Object to Minimizable View, to your content view parameter and to your compact view parameter.
 */
 public class MinimizableViewHandler: ObservableObject {
- 
+    #if canImport(UIKit)
     var keyboardResponder: MVKeyboardNotifier?
+    #endif
     /**
     Handler Initializer.
       - Parameter settings: See MiniSettings for details. can be nil - if nil, the default values will be set.
     */
     public init() {
-
+        #if canImport(UIKit)
         self.keyboardResponder = MVKeyboardNotifier(keyboardWillShow: {
             if self.isMinimized {
                 self.isVisible = false
@@ -28,6 +29,7 @@ public class MinimizableViewHandler: ObservableObject {
         }, keyboardWillHide: {
             self.isVisible = true
         })
+        #endif
         
     }
     ///onPresentation closure
@@ -150,10 +152,10 @@ public struct MiniSettings {
      - Parameter minimizedHeight:  height of the view in minimized state.
      - Parameter overrideHeight: The height  of the miniView in expanded state.If you prefer to set a custom height, you can set this value. Default value is nil, which means it will be set automatically to fill the available vertical space.
      - Parameter lateralMargin: leading and trailing margin of the view.
-     - Parameter minimumDragDistance:minimum distance required to drag before the gesture succeeds. Default value is 0. If your content view contains a List, make sure to set this value > 0 (usually between 10 and 30 is a suitable value) - this will make sure the List is scrollable.
+     - Parameter minimumDragDistance:minimum distance required to drag before the gesture succeeds. Default value is 1. If your content view contains a List or a draggable view element like a slider, make sure to set this value > 1, otherwise other draggable views might become unresponsive
      - Parameter edgesIgnoringSafeArea: Array of Edge.Sets. Default is bottom and top - this means that if you don't override the height of the mini view, it will cover the top and bottom safe areas, if they exist for the device.
     */
-    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, minimumDragDistance: CGFloat = 0, edgesIgnoringSafeArea: Edge.Set = [.bottom, .top]) {
+    public init(minimizedHeight: CGFloat = 60, overrideHeight: CGFloat? = nil, lateralMargin: CGFloat = 0, minimumDragDistance: CGFloat = 1, edgesIgnoringSafeArea: Edge.Set = [.bottom, .top]) {
         self.minimizedHeight = minimizedHeight
         self.overrideHeight = overrideHeight
         self.lateralMargin = lateralMargin
@@ -177,7 +179,7 @@ public struct MiniSettings {
 }
 
 
-
+#if canImport(UIKit)
 public class MVKeyboardNotifier: ObservableObject {
    
     private var notificationCentre: NotificationCenter

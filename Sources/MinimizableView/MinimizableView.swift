@@ -6,7 +6,7 @@
 //  Copyright © 2019 Duoyun. All rights reserved.
 //Version 0.3.2
 
-#if os(iOS)
+
 import SwiftUI
 import Combine
 /**
@@ -136,7 +136,9 @@ struct MinimizableViewModifier<MainContent: View, CompactContent:View, Backgroun
         GeometryReader { proxy in
             ZStack(alignment: Alignment(horizontal: .center, vertical: .bottom)) {
                 
-                content.zIndex(0)
+                content
+//                    .scaleEffect(self.minimizableViewHandler.isMinimized ? 1 : 0.8)
+                .zIndex(0)
                 
                 if self.minimizableViewHandler.isPresented {
                     MinimizableView(content: contentView, compactView: compactView, backgroundView: backgroundView, geometry: proxy, minimizedBottomMargin: minimizedBottomMargin, settings: settings)
@@ -190,4 +192,4 @@ public extension View {
     }
     
 }
-#endif
+
